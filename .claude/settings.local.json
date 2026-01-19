@@ -2,7 +2,21 @@
   "permissions": {
     "allow": [
       "Bash(git init:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(git branch:*)",
+      "Bash(git commit:*)",
+      "Bash(gh repo create:*)",
+      "Bash(git push:*)",
+      "Bash(gh api:*)",
+      "Bash(gh repo edit:*)",
+      "Bash(system_profiler:*)",
+      "Bash(osascript:*)",
+      "Bash(screencapture:*)",
+      "Bash(xcrun simctl list:*)",
+      "Bash(xcrun simctl:*)",
+      "Bash(xcodebuild:*)",
+      "Bash(true xcrun simctl boot:*)",
+      "Bash(ls:*)"
     ]
   }
 }

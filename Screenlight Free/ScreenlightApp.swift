@@ -1,7 +1,7 @@
 import SwiftUI
 
 @main
-struct FlashlightApp: App {
+struct ScreenlightApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView()

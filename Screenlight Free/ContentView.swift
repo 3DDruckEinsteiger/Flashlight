@@ -7,7 +7,7 @@ import UIKit
 #endif
 
 struct ContentView: View {
-    @StateObject private var manager = FlashlightManager()
+    @StateObject private var manager = ScreenlightManager()
     @State private var showSettings = false
     @State private var showFavorites = false
     @State private var newFavoriteName = ""
@@ -186,7 +186,7 @@ struct ContentView: View {
         }
         .background(
             Rectangle()
-                .fill(.ultraThinMaterial)
+                .fill(Color.black.opacity(0.85))
                 .ignoresSafeArea()
         )
     }
@@ -194,7 +194,7 @@ struct ContentView: View {
     // MARK: - Header
     var headerView: some View {
         VStack(spacing: 8) {
-            Text("Flashlight")
+            Text("Screenlight Free")
                 .font(.system(size: 32, weight: .bold))
 
             #if os(iOS)
@@ -431,7 +431,7 @@ struct ContentView: View {
         VStack(spacing: 20) {
             // Mode grid
             LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 16), count: 2), spacing: 16) {
-                ForEach(FlashlightMode.allCases, id: \.self) { mode in
+                ForEach(ScreenlightMode.allCases, id: \.self) { mode in
                     modeButton(mode: mode)
                 }
             }
@@ -443,7 +443,7 @@ struct ContentView: View {
         }
     }
 
-    func modeButton(mode: FlashlightMode) -> some View {
+    func modeButton(mode: ScreenlightMode) -> some View {
         Button(action: {
             withAnimation {
                 manager.setMode(mode)
@@ -469,7 +469,7 @@ struct ContentView: View {
         .buttonStyle(.plain)
     }
 
-    func modeIcon(for mode: FlashlightMode) -> String {
+    func modeIcon(for mode: ScreenlightMode) -> String {
         switch mode {
         case .normal: return "flashlight.on.fill"
         case .sos: return "sos"
@@ -670,7 +670,7 @@ struct ContentView: View {
             HStack(spacing: 12) {
                 Image(systemName: manager.isFullScreen ? "arrow.down.right.and.arrow.up.left" : "flashlight.on.fill")
                     .font(.system(size: 22))
-                Text(manager.isFullScreen ? "Stop Flashlight" : "Start Flashlight")
+                Text(manager.isFullScreen ? "Stop Screenlight" : "Start Screenlight")
                     .font(.system(size: 20, weight: .semibold))
             }
             .foregroundColor(.white)

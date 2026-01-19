@@ -2,7 +2,7 @@ import SwiftUI
 import Combine
 
 // MARK: - Special Modes
-enum FlashlightMode: String, CaseIterable, Codable {
+enum ScreenlightMode: String, CaseIterable, Codable {
     case normal = "Normal"
     case sos = "SOS"
     case candle = "Candle"
@@ -34,11 +34,11 @@ struct FavoriteColor: Identifiable, Codable, Equatable {
 
 // MARK: - Flashlight Manager
 @MainActor
-class FlashlightManager: ObservableObject {
+class ScreenlightManager: ObservableObject {
     // MARK: - Published Properties
     @Published var selectedColor: Color = .white
     @Published var brightness: Double = 1.0
-    @Published var currentMode: FlashlightMode = .normal
+    @Published var currentMode: ScreenlightMode = .normal
     @Published var isFullScreen: Bool = false
     @Published var showControls: Bool = true
 
@@ -133,7 +133,7 @@ class FlashlightManager: ObservableObject {
     }
 
     // MARK: - Mode Control
-    func setMode(_ mode: FlashlightMode) {
+    func setMode(_ mode: ScreenlightMode) {
         stopCurrentMode()
         currentMode = mode
 
@@ -346,7 +346,7 @@ class FlashlightManager: ObservableObject {
         currentPresetIndex = UserDefaults.standard.integer(forKey: "presetIndex")
 
         if let modeString = UserDefaults.standard.string(forKey: "mode"),
-           let mode = FlashlightMode(rawValue: modeString) {
+           let mode = ScreenlightMode(rawValue: modeString) {
             currentMode = mode
         }
 
