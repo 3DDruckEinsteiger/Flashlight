@@ -1,14 +1,14 @@
-# Privacy Policy for Screenlight
+# Privacy Policy for Screenlight Mobile
 
-Last updated: January 19, 2025
+Last updated: November 12, 2026
 
 ## Introduction
 
-This Privacy Policy describes how Screenlight ("we", "our", or "the App") handles information when you use our mobile and desktop application.
+This Privacy Policy describes how Screenlight Mobile ("we", "our", or "the App") handles information when you use our mobile and desktop application.
 
 ## Information Collection
 
-Screenlight does not collect, store, or transmit any personal data.
+Screenlight Mobile does not collect, store, or transmit any personal data.
 
 The App operates entirely on your device and does not:
 - Collect personal information
@@ -24,7 +24,7 @@ All app settings (such as favorite colors and preferences) are stored locally on
 
 ## Third-Party Services
 
-Screenlight does not integrate with any third-party services, advertising networks, or analytics platforms.
+Screenlight Mobile does not integrate with any third-party services, advertising networks, or analytics platforms.
 
 ## Children's Privacy
 
