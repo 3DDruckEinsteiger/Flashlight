@@ -194,7 +194,7 @@ struct ContentView: View {
     // MARK: - Header
     var headerView: some View {
         VStack(spacing: 8) {
-            Text("Screenlight Free")
+            Text("Screenlight Mobile")
                 .font(.system(size: 32, weight: .bold))
 
             #if os(iOS)

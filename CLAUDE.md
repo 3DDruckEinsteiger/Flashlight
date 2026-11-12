@@ -6,26 +6,26 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ```bash
 # Build for macOS
-xcodebuild -project "Screenlight Free.xcodeproj" -scheme "Screenlight Free" -destination 'platform=macOS' build
+xcodebuild -project "Screenlight.xcodeproj" -scheme "Screenlight" -destination 'platform=macOS' build
 
 # Build for iOS Simulator
-xcodebuild -project "Screenlight Free.xcodeproj" -scheme "Screenlight Free" -destination 'platform=iOS Simulator,name=iPhone 15 Pro Max' build
+xcodebuild -project "Screenlight.xcodeproj" -scheme "Screenlight" -destination 'platform=iOS Simulator,name=iPhone 15 Pro Max' build
 
 # Archive for App Store (macOS)
-xcodebuild -project "Screenlight Free.xcodeproj" -scheme "Screenlight Free" -destination 'platform=macOS' archive
+xcodebuild -project "Screenlight.xcodeproj" -scheme "Screenlight" -destination 'platform=macOS' archive
 
 # Archive for App Store (iOS)
-xcodebuild -project "Screenlight Free.xcodeproj" -scheme "Screenlight Free" -destination 'generic/platform=iOS' archive
+xcodebuild -project "Screenlight.xcodeproj" -scheme "Screenlight" -destination 'generic/platform=iOS' archive
 
 # Clean build
-xcodebuild -project "Screenlight Free.xcodeproj" -scheme "Screenlight Free" clean
+xcodebuild -project "Screenlight.xcodeproj" -scheme "Screenlight" clean
 ```
 
 In Xcode: `⌘B` to build, `⌘R` to run, `⌘+Shift+K` to clean build folder.
 
 ## Architecture
 
-**Screenlight Free** is a SwiftUI multiplatform app (iOS/macOS) that turns the device screen into a customizable light source.
+**Screenlight** is a SwiftUI multiplatform app (iOS/macOS) that turns the device screen into a customizable light source.
 
 ### Key Files
 
