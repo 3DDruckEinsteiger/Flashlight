@@ -40,8 +40,29 @@ final class LightStore: ObservableObject {
 
     init(defaults: UserDefaults = .standard) {
         self.defaults = defaults
+        #if DEBUG
+        // UI tests start from a clean slate.
+        if defaults.bool(forKey: "uiTestReset"), let domain = Bundle.main.bundleIdentifier {
+            defaults.removePersistentDomain(forName: domain)
+        }
+        #endif
         load()
+        #if DEBUG
+        applyScreenshotArguments()
+        #endif
     }
+
+    #if DEBUG
+    /// Launch arguments used to stage App Store screenshots and UI tests.
+    private func applyScreenshotArguments() {
+        if let list = defaults.string(forKey: "uiTestFavorites") {
+            favorites = list.split(separator: ",").compactMap { LightColor(hex: String($0)) }
+                .map { FavoriteColor(name: $0.hex, color: $0) }
+        }
+        let minutes = defaults.integer(forKey: "uiTestTimerMinutes")
+        if minutes > 0 { startTimer(minutes: minutes) }
+    }
+    #endif
 
     // MARK: - Light
 
@@ -109,7 +130,13 @@ final class LightStore: ObservableObject {
 
     func startTimer(minutes: Int) {
         if !isOn { isOn = true }
-        let end = Date().addingTimeInterval(TimeInterval(minutes * 60))
+        var secondsPerMinute = 60.0
+        #if DEBUG
+        // UI tests shorten the minute so that the timer can be watched running out.
+        let override = defaults.double(forKey: "uiTestSecondsPerMinute")
+        if override > 0 { secondsPerMinute = override }
+        #endif
+        let end = Date().addingTimeInterval(TimeInterval(minutes) * secondsPerMinute)
         timerEnd = end
         Haptics.selection()
         scheduleTimerTask(until: end)

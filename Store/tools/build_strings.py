@@ -41,7 +41,8 @@ def load() -> dict:
         if code != "en-CA":
             # "torch" is the everyday word there; lead with it.
             store["keywords"] = store["keywords"].replace("flashlight,torch", "torch,flashlight")
-        languages[code] = {"ui": {k: british(v) for k, v in english["ui"].items()}, "store": store}
+        languages[code] = {"ui": {k: british(v) for k, v in english["ui"].items()}, "store": store,
+                           "shots": [british(v) for v in english.get("shots", [])]}
     return languages
 
 

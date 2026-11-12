@@ -23,6 +23,7 @@ struct ColorSection: View {
                            isSelected: store.mode.usesSelectedColor && store.color.isClose(to: preset.color)) {
                         store.select(preset.color)
                     }
+                    .accessibilityIdentifier("swatch.\(preset.color.hex)")
                 }
             }
 
@@ -37,6 +38,7 @@ struct ColorSection: View {
                         label: Text("White tone"),
                         valueText: whiteToneDescription
                     )
+                    .accessibilityIdentifier("whiteTone")
                     Image(systemName: "snowflake")
                         .foregroundStyle(LightColor.coolWhite.color)
                 }
@@ -65,6 +67,7 @@ struct ColorSection: View {
                 }
                 .buttonStyle(ChipStyle())
                 .disabled(store.isCurrentColorFavorite)
+                .accessibilityIdentifier("favorite.save")
             }
 
             if !store.favorites.isEmpty {
@@ -102,6 +105,7 @@ struct ColorSection: View {
                         .accessibilityAction(named: Text("Remove favorite")) {
                             store.removeFavorite(favorite)
                         }
+                        .accessibilityIdentifier("favorite.\(favorite.lightColor.hex)")
                     }
                 }
             }
@@ -133,6 +137,7 @@ struct ModeSection: View {
                     }
                     .buttonStyle(ChipStyle(isSelected: store.mode == mode, minHeight: 68))
                     .accessibilityAddTraits(store.mode == mode ? [.isSelected] : [])
+                    .accessibilityIdentifier("mode.\(mode.rawValue)")
                 }
             }
 
@@ -210,6 +215,7 @@ struct TimerSection: View {
                     }
                     .buttonStyle(ChipStyle())
                     .fixedSize(horizontal: true, vertical: false)
+                    .accessibilityIdentifier("timer.stop")
                 }
                 .frame(minHeight: Metrics.controlHeight)
             } else {
@@ -229,6 +235,7 @@ struct TimerSection: View {
                     }
                     .buttonStyle(ChipStyle(minHeight: Metrics.controlHeight))
                     .accessibilityLabel(Self.minutesText(minutes, width: .wide))
+                    .accessibilityIdentifier("timer.\(minutes)")
                 }
             }
         }

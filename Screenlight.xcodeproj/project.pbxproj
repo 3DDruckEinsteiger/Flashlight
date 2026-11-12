@@ -19,6 +19,7 @@
 		A1000001016 /* ControlPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000002016 /* ControlPanel.swift */; };
 		A1000001017 /* LightSurface.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000002017 /* LightSurface.swift */; };
 		A1000001020 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = A1000002020 /* Localizable.xcstrings */; };
+		B1000001001 /* ScreenlightUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000002001 /* ScreenlightUITests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -35,10 +36,19 @@
 		A1000002016 /* ControlPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ControlPanel.swift; sourceTree = "<group>"; };
 		A1000002017 /* LightSurface.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LightSurface.swift; sourceTree = "<group>"; };
 		A1000002020 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
+		B1000002001 /* ScreenlightUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenlightUITests.swift; sourceTree = "<group>"; };
+		B1000003001 /* ScreenlightUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ScreenlightUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		A1000004001 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		B1000004001 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -52,6 +62,7 @@
 			isa = PBXGroup;
 			children = (
 				A1000005002 /* Screenlight */,
+				B1000005001 /* ScreenlightUITests */,
 				A1000005003 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -74,6 +85,7 @@
 			isa = PBXGroup;
 			children = (
 				A1000003001 /* Screenlight.app */,
+				B1000003001 /* ScreenlightUITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -107,6 +119,14 @@
 			path = Views;
 			sourceTree = "<group>";
 		};
+		B1000005001 /* ScreenlightUITests */ = {
+			isa = PBXGroup;
+			children = (
+				B1000002001 /* ScreenlightUITests.swift */,
+			);
+			path = ScreenlightUITests;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -127,6 +147,23 @@
 			productReference = A1000003001 /* Screenlight.app */;
 			productType = "com.apple.product-type.application";
 		};
+		B1000006001 /* ScreenlightUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = B1000007001 /* Build configuration list for PBXNativeTarget "ScreenlightUITests" */;
+			buildPhases = (
+				B1000008001 /* Sources */,
+				B1000004001 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				B100000E001 /* PBXTargetDependency */,
+			);
+			name = ScreenlightUITests;
+			productName = ScreenlightUITests;
+			productReference = B1000003001 /* ScreenlightUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -140,6 +177,10 @@
 					A1000006001 = {
 						CreatedOnToolsVersion = 15.0;
 					};
+					B1000006001 = {
+						CreatedOnToolsVersion = 15.0;
+						TestTargetID = A1000006001;
+					};
 				};
 			};
 			buildConfigurationList = A100000B001 /* Build configuration list for PBXProject "Screenlight" */;
@@ -149,10 +190,55 @@
 			knownRegions = (
 				en,
 				Base,
+				ar,
+				bn,
+				ca,
+				cs,
+				da,
 				de,
+				el,
 				"en-AU",
 				"en-CA",
 				"en-GB",
+				es,
+				"es-419",
+				fi,
+				fr,
+				"fr-CA",
+				gu,
+				he,
+				hi,
+				hr,
+				hu,
+				id,
+				it,
+				ja,
+				kn,
+				ko,
+				ml,
+				mr,
+				ms,
+				nb,
+				nl,
+				or,
+				pa,
+				pl,
+				"pt-BR",
+				"pt-PT",
+				ro,
+				ru,
+				sk,
+				sl,
+				sv,
+				ta,
+				te,
+				th,
+				tr,
+				uk,
+				ur,
+				vi,
+				"zh-Hans",
+				"zh-Hant",
 			);
 			mainGroup = A1000005001;
 			productRefGroup = A1000005003 /* Products */;
@@ -160,6 +246,7 @@
 			projectRoot = "";
 			targets = (
 				A1000006001 /* Screenlight */,
+				B1000006001 /* ScreenlightUITests */,
 			);
 		};
 /* End PBXProject section */
@@ -176,6 +263,24 @@
 		};
 /* End PBXResourcesBuildPhase section */
 
+/* Begin PBXContainerItemProxy section */
+		B100000D001 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = A100000A001 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = A1000006001;
+			remoteInfo = Screenlight;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXTargetDependency section */
+		B100000E001 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = A1000006001 /* Screenlight */;
+			targetProxy = B100000D001 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
 /* Begin PBXSourcesBuildPhase section */
 		A1000008001 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
@@ -191,6 +296,14 @@
 				A1000001016 /* ControlPanel.swift in Sources */,
 				A1000001017 /* LightSurface.swift in Sources */,
 				A1000001001 /* ScreenlightApp.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		B1000008001 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B1000001001 /* ScreenlightUITests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -389,6 +502,46 @@
 			};
 			name = Release;
 		};
+		B100000C001 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = X34YY968L9;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.amim.Flashlight.UITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = Screenlight;
+			};
+			name = Debug;
+		};
+		B100000C002 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = X34YY968L9;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.amim.Flashlight.UITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = Screenlight;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -406,6 +559,15 @@
 			buildConfigurations = (
 				A100000C001 /* Debug */,
 				A100000C002 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		B1000007001 /* Build configuration list for PBXNativeTarget "ScreenlightUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				B100000C001 /* Debug */,
+				B100000C002 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

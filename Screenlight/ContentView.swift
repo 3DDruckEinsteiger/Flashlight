@@ -10,7 +10,7 @@ struct ContentView: View {
     @State private var panelVisible = !UserDefaults.standard.bool(forKey: "startLightOnly")
     @State private var dragAxis: Axis?
     @State private var dragStartBrightness = 1.0
-    @State private var hudVisible = false
+    @State private var hudVisible = UserDefaults.standard.bool(forKey: "uiTestShowHUD")
     @State private var hudTask: Task<Void, Never>?
     @AppStorage("hintDismissed") private var hintDismissed = false
     #if os(macOS)
@@ -30,6 +30,7 @@ struct ContentView: View {
                 .accessibilityValue(store.isOn ? Text("On") : Text("Off"))
                 .accessibilityHint(Text("Double tap to show or hide the controls."))
                 .accessibilityAddTraits(.isButton)
+                .accessibilityIdentifier("surface")
 
             if hudVisible {
                 brightnessHUD
@@ -202,6 +203,7 @@ struct ContentView: View {
             }
             .buttonStyle(.plain)
             .accessibilityLabel(Text("Close tips"))
+            .accessibilityIdentifier("hint.close")
         }
         .foregroundStyle(Color.white)
         .padding(.leading, 16)

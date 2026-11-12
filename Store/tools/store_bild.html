@@ -1,0 +1,82 @@
+<!doctype html>
+<!--
+  Vorlage für die gestalteten App-Store-Bilder von Screenlight Mobile.
+  Wird von store_bilder.py mit Chrome (headless) gerendert.
+  Parameter in der URL: w, h (Zielgröße in Pixel), shot (Pfad zum echten Screenshot),
+  text (Überschrift), glow (Lichtfarbe als Hex ohne #), radius (Eckenradius als Anteil
+  der Screenshot-Breite), dir (ltr/rtl), lang, font (zusätzliche Schriftfamilie).
+-->
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  @font-face { font-family: "Inter"; src: url("../medien/schrift/Inter.ttf"); font-weight: 100 900; }
+  html, body { margin: 0; padding: 0; background: #07070b; overflow: hidden; }
+  #canvas { position: relative; overflow: hidden; background: #07070b; }
+  #glow { position: absolute; inset: 0; }
+  #band { position: absolute; left: 0; right: 0; top: 0; display: flex; align-items: center; justify-content: center; }
+  #head { color: #fff; font-weight: 750; letter-spacing: -0.015em; line-height: 1.12; text-align: center;
+          text-wrap: balance; text-shadow: 0 0.04em 0.35em rgba(0,0,0,0.55); }
+  #shot { position: absolute; display: block; }
+</style>
+</head>
+<body>
+<div id="canvas">
+  <div id="glow"></div>
+  <div id="band"><div id="head"></div></div>
+  <img id="shot">
+</div>
+<script>
+  const q = new URLSearchParams(location.search);
+  const W = +q.get("w"), H = +q.get("h");
+  const glow = "#" + (q.get("glow") || "ffd199");
+  const canvas = document.getElementById("canvas");
+  canvas.style.width = W + "px";
+  canvas.style.height = H + "px";
+  document.documentElement.lang = q.get("lang") || "en";
+  document.documentElement.dir = q.get("dir") || "ltr";
+
+  // The light of the app shines out from behind the screenshot.
+  document.getElementById("glow").style.background =
+    `radial-gradient(ellipse 95% 62% at 50% 60%, ${glow}e6 0%, ${glow}73 45%, transparent 78%),` +
+    `radial-gradient(ellipse 70% 30% at 50% 0%, ${glow}40 0%, transparent 70%),` +
+    `linear-gradient(180deg, #101018 0%, #07070b 100%)`;
+
+  const portrait = H > W;
+  const bandH = H * (portrait ? 0.19 : 0.22);
+  const bottom = H * (portrait ? 0.045 : 0.06);
+  const band = document.getElementById("band");
+  band.style.height = bandH + "px";
+  band.style.paddingTop = (H * 0.012) + "px";
+
+  const head = document.getElementById("head");
+  const extra = q.get("font");
+  head.style.fontFamily = (extra ? `"${extra}", ` : "") + `"Inter", sans-serif`;
+  head.textContent = q.get("text") || "";
+  head.style.maxWidth = (W * 0.86) + "px";
+  let size = bandH * (portrait ? 0.30 : 0.36);
+  // At most two lines, and never taller than the band.
+  const fits = () => head.scrollHeight <= Math.min(bandH * 0.80, size * 1.12 * 2.2) && head.scrollWidth <= W * 0.86 + 1;
+  head.style.fontSize = size + "px";
+  while (!fits() && size > 20) { size -= 2; head.style.fontSize = size + "px"; }
+
+  const shot = document.getElementById("shot");
+  shot.onload = () => {
+    const availH = H - bandH - bottom, availW = W * 0.90;
+    const ratio = shot.naturalWidth / shot.naturalHeight;
+    let sh = availH, sw = sh * ratio;
+    if (sw > availW) { sw = availW; sh = sw / ratio; }
+    shot.style.width = sw + "px";
+    shot.style.height = sh + "px";
+    shot.style.left = ((W - sw) / 2) + "px";
+    shot.style.top = (bandH + (availH - sh) / 2) + "px";
+    const radius = sw * (+q.get("radius") || 0.04);
+    shot.style.borderRadius = radius + "px";
+    const ring = Math.max(3, sw * 0.006);
+    shot.style.boxShadow = `0 0 0 ${ring}px rgba(255,255,255,0.92), 0 ${H * 0.012}px ${H * 0.045}px rgba(0,0,0,0.6)`;
+    document.title = "ready";
+  };
+  shot.src = q.get("shot");
+</script>
+</body>
+</html>

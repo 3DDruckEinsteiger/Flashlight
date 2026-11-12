@@ -62,8 +62,15 @@
   "store": {
     "subtitle": "Dein Bildschirm als Lampe",
     "promo": "Mach deinen Bildschirm zum sanften, blendfreien Licht: jede Farbe, Weiß von warm bis kalt, dimmbar. Mit Kerze, SOS, Disco und Abschalt-Timer. Ohne Werbung, ohne Tracking.",
-    "keywords": "taschenlampe,lampe,licht,nachtlicht,leselicht,leselampe,softbox,selfie,farblicht,sos,kerze,dimmen",
+    "keywords": "nachtlicht,leselicht,leselampe,softbox,selfie,farblicht,stimmungslicht,lampe,kerze,sos,fülllicht",
     "description": "Screenlight Mobile macht den Bildschirm von iPhone, iPad oder Mac zu einem sanften, gleichmäßigen Licht – genau in der Farbe und Helligkeit, die du brauchst.\n\nDie LED auf der Rückseite des Handys ist grell und kennt nur eine Stufe. Dein Bildschirm ist angenehm für die Augen, lässt sich dimmen und leuchtet in jeder Farbe. App öffnen, und das Licht ist an.\n\nFÜR EINE HAND GEMACHT\n• Großer An/Aus-Knopf und breiter Helligkeitsregler unten am Bildschirm\n• Auf dem Licht hoch oder runter wischen ändert die Helligkeit, seitlich wischen die Farbe\n• Tippe auf das Licht, um die Bedienung auszublenden – dann leuchtet der ganze Bildschirm\n\nJEDE FARBE, JEDES WEISS\n• Zehn fertige Farben\n• Weißton von warmem Kerzenlicht bis kühlem Tageslicht\n• Wähle jede beliebige Farbe und merke dir deine Favoriten\n\nMODI\n• Dauerlicht\n• Notsignal SOS im Morsecode\n• Kerze mit sanftem Flackern\n• Disco, Regenbogen und Verlauf zwischen zwei Farben deiner Wahl\n\nPRAKTISCHE DETAILS\n• Abschalt-Timer von 1 bis 60 Minuten – ideal als Nachtlicht\n• Der Bildschirm bleibt wach, solange das Licht an ist\n• Auf iPhone und iPad schaltet der Bildschirm auf volle Helligkeit und danach zurück auf deine Einstellung\n• Animationen pausieren, wenn das Licht aus ist, das spart Akku\n• Funktioniert mit VoiceOver, großer Schrift und „Bewegung reduzieren“\n• Auf dem Mac: Tastaturkurzbefehle und Vollbild\n\nGUT FÜR\n• Lesen im Bett, ohne jemanden zu wecken\n• Ein Nachtlicht für Kinder\n• Weiches Aufhelllicht für Fotos, Selfies und Videoanrufe\n• Rotes Licht, das beim Sternegucken die Nachtsicht erhält\n• Schlüsselloch, Zeltreißverschluss oder Sicherungskasten finden\n\nPRIVAT VON ANFANG AN\nKein Konto, keine Werbung, kein Tracking. Screenlight Mobile sammelt keine Daten und funktioniert komplett offline.",
     "whatsnew": "Komplett überarbeitet.\n\n• Neue Oberfläche: Das Licht füllt den Bildschirm, alle Bedienelemente liegen unten in Daumenreichweite\n• Ein großer Knopf für An und Aus und ein breiter Helligkeitsregler\n• Auf dem Licht wischen: hoch oder runter für die Helligkeit, seitlich für die Farbe\n• Neuer Weißton-Regler von warm bis kalt\n• Lieblingsfarben mit einem Tipp merken\n• Der Bildschirm bleibt jetzt wach, solange das Licht an ist; auf iPhone und iPad schaltet er zusätzlich auf volle Helligkeit\n• Timer korrigiert: Das Licht geht jetzt sauber aus und kommt mit deiner Helligkeit zurück\n• Ruhigerer Disco-Modus, weichere Kerze, weniger Akkuverbrauch\n• Bessere Unterstützung für VoiceOver, große Schrift und „Bewegung reduzieren“\n• Jetzt in vielen weiteren Sprachen verfügbar"
-  }
+  },
+  "shots": [
+    "Sanftes Licht aus deinem Bildschirm",
+    "Jede Farbe, die du magst",
+    "Kerze, SOS, Regenbogen und mehr",
+    "Schaltet sich von selbst aus",
+    "Wischen für Helligkeit und Farbe"
+  ]
 }

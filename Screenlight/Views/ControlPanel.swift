@@ -94,6 +94,7 @@ struct ControlPanel: View {
                     }
                 }
                 .buttonStyle(ChipStyle(isSelected: selectedTab == tab))
+                .accessibilityIdentifier("tab.\(tab.rawValue)")
                 .accessibilityAddTraits(selectedTab == tab ? [.isSelected] : [])
             }
         }
@@ -114,6 +115,7 @@ struct ControlPanel: View {
                 label: Text("Brightness"),
                 valueText: brightnessText
             )
+            .accessibilityIdentifier("brightness")
             Text(brightnessText)
                 .font(.subheadline.weight(.semibold))
                 .monospacedDigit()
@@ -147,6 +149,7 @@ struct ControlPanel: View {
             .accessibilityLabel(Text("Light"))
             .accessibilityValue(store.isOn ? Text("On") : Text("Off"))
             .accessibilityHint(store.isOn ? Text("Turn off") : Text("Turn on"))
+            .accessibilityIdentifier("power")
 
             Button(action: onLightOnly) {
                 VStack(spacing: 2) {
@@ -164,6 +167,7 @@ struct ControlPanel: View {
             }
             .buttonStyle(.plain)
             .accessibilityHint(Text("Hides the controls. Tap the light to show them again."))
+            .accessibilityIdentifier("lightOnly")
         }
     }
 
@@ -182,6 +186,7 @@ struct ControlPanel: View {
             .frame(minHeight: Metrics.touchTarget)
             .contentShape(Rectangle())
             .buttonStyle(.plain)
+            .accessibilityIdentifier("undo")
         }
         .padding(.leading, 12)
         .background(

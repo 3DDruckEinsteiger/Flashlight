@@ -16,7 +16,7 @@
     "Fade": "Prijelaz",
     "Favorite removed": "Favorit uklonjen",
     "Favorites · touch and hold to remove": "Favoriti · dodirnite i zadržite za uklanjanje",
-    "Flashes the distress signal SOS in Morse code.": "Trepće signal za pomoć SOS Morseovim kodom.",
+    "Flashes the distress signal SOS in Morse code.": "Šalje signal za pomoć SOS Morseovim kodom.",
     "From": "Od",
     "Green": "Zelena",
     "Hides the controls. Tap the light to show them again.": "Skriva kontrole. Dodirnite svjetlo za njihov ponovni prikaz.",
@@ -37,7 +37,7 @@
     "Remove favorite": "Ukloni favorit",
     "SOS": "SOS",
     "Save color": "Spremi boju",
-    "Saved": "Spremljeno",
+    "Saved": "Spremljena",
     "Slowly drifts through all colors.": "Polako prolazi kroz sve boje.",
     "Space: light on or off": "Razmaknica: uključivanje ili isključivanje svjetla",
     "Steady": "Stalno",
@@ -53,7 +53,7 @@
     "Turn the light off automatically:": "Automatski isključi svjetlo:",
     "Undo": "Poništi",
     "Warm": "Toplo",
-    "Warm white": "Toplo bijela",
+    "Warm white": "Topla bijela",
     "Warm, softly flickering light.": "Toplo svjetlo koje nježno treperi.",
     "White": "Bijela",
     "White tone": "Ton bijele",
@@ -62,8 +62,8 @@
   "store": {
     "subtitle": "Vaš zaslon kao izvor svjetla",
     "promo": "Pretvorite zaslon u meko svjetlo koje ne blješti: bilo koja boja, bijela od tople do hladne, podesiva svjetlina. Svijeća, SOS, disko i timer. Bez oglasa i praćenja.",
-    "keywords": "svjetiljka,lampa,baterija,noćno svjetlo,čitanje,softbox,selfie,boje,sos,svijeća,ugođaj,rasvjeta",
-    "description": "Screenlight Mobile pretvara zaslon vašeg iPhonea, iPada ili Maca u meko, ravnomjerno svjetlo – točno u boji i svjetlini koja vam treba.\n\nLED na poleđini telefona oštar je i ima samo jednu jačinu. Vaš je zaslon ugodan za oči, može se prigušiti i svijetliti u bilo kojoj boji. Otvorite aplikaciju i svjetlo je upaljeno.\n\nNAPRAVLJENO ZA JEDNU RUKU\n• Velika tipka za uključivanje i isključivanje te širok kliznik svjetline pri dnu zaslona\n• Povucite po svjetlu prema gore ili dolje za promjenu svjetline, a ulijevo ili udesno za promjenu boje\n• Dodirnite svjetlo da biste sakrili kontrole – tada svijetli cijeli zaslon\n\nSVAKA BOJA, SVAKA BIJELA\n• Deset gotovih boja\n• Ton bijele od tople svjetlosti svijeće do hladnog dnevnog svjetla\n• Odaberite bilo koju boju i spremite svoje favorite\n\nNAČINI\n• Stalno svjetlo\n• Signal za pomoć SOS Morseovim kodom\n• Svijeća s nježnim treperenjem\n• Disko, Duga i Prijelaz između dviju boja po vašem izboru\n\nKORISNE POJEDINOSTI\n• Timer za automatsko isključivanje od 1 do 60 minuta – idealno kao noćno svjetlo\n• Zaslon se ne gasi dok je svjetlo uključeno\n• Na iPhoneu i iPadu zaslon prelazi na punu svjetlinu, a zatim se vraća na vašu postavku\n• Animacije se pauziraju kad je svjetlo isključeno radi štednje baterije\n• Radi uz VoiceOver, veliki tekst i postavku za smanjenje kretanja\n• Na Macu: tipkovnički prečaci i prikaz preko cijelog zaslona\n\nDOBRO ZA\n• Čitanje u krevetu, a da nikoga ne probudite\n• Noćno svjetlo za djecu\n• Meko dopunsko svjetlo za fotografije, selfieje i videopozive\n• Crveno svjetlo koje čuva noćni vid pri promatranju zvijezda\n• Pronalaženje ključanice, patentnog zatvarača na šatoru ili ormarića s osiguračima\n\nPRIVATNOST OD POČETKA\nBez računa, bez oglasa, bez praćenja. Screenlight Mobile ne prikuplja nikakve podatke i radi potpuno izvan mreže.",
+    "keywords": "lampa,noćno svjetlo,čitanje,softbox,selfie,boje,sos,svijeća,ugođaj,rasvjeta,ambijent,videopoziv",
+    "description": "Screenlight Mobile pretvara zaslon vašeg iPhonea, iPada ili Maca u meko, ravnomjerno svjetlo – točno u boji i svjetlini koja vam treba.\n\nLED svjetlo na poleđini telefona oštro je i ima samo jednu jačinu. Vaš je zaslon ugodan za oči, može se prigušiti i svijetliti u bilo kojoj boji. Otvorite aplikaciju i svjetlo je uključeno.\n\nNAPRAVLJENO ZA JEDNU RUKU\n• Velika tipka za uključivanje i isključivanje te širok kliznik svjetline pri dnu zaslona\n• Povucite po svjetlu prema gore ili dolje za promjenu svjetline, a ulijevo ili udesno za promjenu boje\n• Dodirnite svjetlo da biste sakrili kontrole – tada svijetli cijeli zaslon\n\nSVAKA BOJA, SVAKA BIJELA\n• Deset gotovih boja\n• Ton bijele od tople svjetlosti svijeće do hladnog dnevnog svjetla\n• Odaberite bilo koju boju i spremite svoje favorite\n\nNAČINI\n• Stalno svjetlo\n• Signal za pomoć SOS Morseovim kodom\n• Svijeća s nježnim treperenjem\n• Disko, Duga i Prijelaz između dviju boja po vašem izboru\n\nKORISNE POJEDINOSTI\n• Timer za automatsko isključivanje od 1 do 60 minuta – idealno kao noćno svjetlo\n• Zaslon se ne gasi dok je svjetlo uključeno\n• Na iPhoneu i iPadu zaslon prelazi na punu svjetlinu, a zatim se vraća na vašu postavku\n• Animacije se pauziraju kad je svjetlo isključeno radi štednje baterije\n• Radi uz VoiceOver, veliki tekst i postavku za smanjenje kretanja\n• Na Macu: tipkovnički prečaci i prikaz preko cijelog zaslona\n\nDOBRO ZA\n• Čitanje u krevetu, a da nikoga ne probudite\n• Noćno svjetlo za djecu\n• Meko dopunsko svjetlo za fotografije, selfieje i videopozive\n• Crveno svjetlo koje čuva noćni vid pri promatranju zvijezda\n• Pronalaženje ključanice, patentnog zatvarača na šatoru ili ormarića s osiguračima\n\nPRIVATNOST OD POČETKA\nBez računa, bez oglasa, bez praćenja. Screenlight Mobile ne prikuplja nikakve podatke i radi potpuno izvan mreže.",
     "whatsnew": "Potpuno preuređeno.\n\n• Novi izgled: svjetlo ispunjava zaslon, a sve su kontrole pri dnu, nadohvat palca\n• Jedna velika tipka za uključivanje i isključivanje te širok kliznik svjetline\n• Povucite po svjetlu: prema gore ili dolje za svjetlinu, ulijevo ili udesno za boju\n• Novi kliznik za ton bijele, od toplog do hladnog\n• Spremite omiljene boje jednim dodirom\n• Zaslon se sada ne gasi dok je svjetlo uključeno; na iPhoneu i iPadu usto prelazi na punu svjetlinu\n• Timer popravljen: svjetlo se sada uredno gasi i vraća s vašom svjetlinom\n• Mirniji način Disko, mekša Svijeća, manja potrošnja baterije\n• Bolja podrška za VoiceOver, veliki tekst i postavku za smanjenje kretanja\n• Sada dostupno na još mnogo jezika"
   }
 }
