@@ -15,7 +15,7 @@ struct LightSurface: View {
                 Color.black
             } else if store.mode.isAnimated {
                 TimelineView(.animation(minimumInterval: store.mode.frameInterval,
-                                        paused: scenePhase != .active)) { context in
+                                        paused: isPaused)) { context in
                     color(at: context.date).color
                 }
             } else {
@@ -24,6 +24,16 @@ struct LightSurface: View {
         }
         .ignoresSafeArea()
         .animation(.easeInOut(duration: 0.25), value: store.isOn)
+    }
+
+    /// On the Mac the window keeps shining while another app is in front
+    /// (a light for a video call must not freeze); on iOS it pauses with the app.
+    private var isPaused: Bool {
+        #if os(macOS)
+        scenePhase == .background
+        #else
+        scenePhase != .active
+        #endif
     }
 
     private func color(at date: Date) -> LightColor {

@@ -40,7 +40,7 @@ struct LightColor: Codable, Hashable {
     /// Reads the sRGB components of a SwiftUI colour (used for the system colour picker).
     init(_ color: Color) {
         #if os(macOS)
-        let native = NSColor(color).usingColorSpace(.sRGB) ?? .white
+        let native = NSColor(color).usingColorSpace(.sRGB) ?? NSColor(srgbRed: 1, green: 1, blue: 1, alpha: 1)
         self.init(red: native.redComponent, green: native.greenComponent, blue: native.blueComponent)
         #else
         var r: CGFloat = 1, g: CGFloat = 1, b: CGFloat = 1
@@ -139,6 +139,18 @@ struct FavoriteColor: Identifiable, Codable, Equatable {
 
     var lightColor: LightColor {
         LightColor(red: red, green: green, blue: blue)
+    }
+
+    /// Name for VoiceOver. Favourites saved since 1.1 carry a hex code as their
+    /// name; for those the nearest named colour is spoken instead.
+    var spokenName: String {
+        guard name.hasPrefix("#") else { return name }
+        let own = lightColor
+        func distance(_ other: LightColor) -> Double {
+            pow(own.red - other.red, 2) + pow(own.green - other.green, 2) + pow(own.blue - other.blue, 2)
+        }
+        let nearest = ColorPreset.all.min { distance($0.color) < distance($1.color) }
+        return nearest?.name ?? name
     }
 }
 

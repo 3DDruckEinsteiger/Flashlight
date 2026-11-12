@@ -95,6 +95,8 @@ struct LightSlider: View {
     var kind: Kind = .fill
     /// Shown inside the filled part of the track.
     var symbol: String?
+    /// Step for VoiceOver's swipe up/down.
+    var step: Double = 0.1
     let label: Text
     let valueText: String
 
@@ -124,7 +126,8 @@ struct LightSlider: View {
                     }
                 case .gradient(let colors):
                     Capsule()
-                        .fill(LinearGradient(colors: colors, startPoint: .leading, endPoint: .trailing))
+                        .fill(LinearGradient(colors: layoutDirection == .rightToLeft ? colors.reversed() : colors,
+                                             startPoint: .leading, endPoint: .trailing))
                         .padding(.vertical, 8)
                     Circle()
                         .fill(Color.white)
@@ -151,10 +154,11 @@ struct LightSlider: View {
         .accessibilityLabel(label)
         .accessibilityValue(valueText)
         .accessibilityAdjustableAction { direction in
-            let step = (range.upperBound - range.lowerBound) / 10
+            // Land on round values (10 %, 20 % …) instead of drifting.
+            let current = (value / step).rounded()
             switch direction {
-            case .increment: value = min(range.upperBound, value + step)
-            case .decrement: value = max(range.lowerBound, value - step)
+            case .increment: value = min(range.upperBound, (current + 1) * step)
+            case .decrement: value = max(range.lowerBound, (current - 1) * step)
             @unknown default: break
             }
         }

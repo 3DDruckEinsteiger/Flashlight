@@ -51,7 +51,9 @@ final class ScreenlightUITests: XCTestCase {
         app.launchArguments = ["-AppleLanguages", "(en)", "-uiTestReset", "YES"]
         app.launch()
         XCTAssertTrue(element("hint.close").waitForExistence(timeout: 20))
-        XCTAssertTrue(app.staticTexts["Swipe sideways: color"].exists)
+        let tips = app.descendants(matching: .any).matching(
+            NSPredicate(format: "label CONTAINS 'Swipe sideways: color'")).firstMatch
+        XCTAssertTrue(tips.exists, "the tips mention the swipe gesture")
         element("hint.close").tap()
         XCTAssertTrue(element("hint.close").waitForNonExistence(timeout: 3))
     }
@@ -68,9 +70,10 @@ final class ScreenlightUITests: XCTestCase {
 
     func testSwipingSidewaysStepsThroughColors() {
         launch()
-        element("surface").swipeLeft()
+        // Swipe on the free light above the panel, not on the panel itself.
+        drag(fromX: 0.8, y: 0.15, toX: 0.2, y: 0.15)
         XCTAssertTrue(element("swatch.#FFD199").isSelected, "swipe left selects the next preset")
-        element("surface").swipeRight()
+        drag(fromX: 0.2, y: 0.15, toX: 0.8, y: 0.15)
         XCTAssertTrue(element("swatch.#FFFFFF").isSelected, "swipe right goes back")
     }
 
@@ -78,14 +81,15 @@ final class ScreenlightUITests: XCTestCase {
         launch()
         XCTAssertEqual(value("brightness"), "100%")
         element("brightness").coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).tap()
-        let afterTap = value("brightness")
-        XCTAssertNotEqual(afterTap, "100%", "tapping the middle of the slider dims the light")
+        let afterTap = percent("brightness")
+        XCTAssertTrue((35...65).contains(afterTap), "tapping the middle of the slider gives about half: \(afterTap)")
 
-        let surface = element("surface")
-        let start = surface.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.10))
-        let end = surface.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.35))
-        start.press(forDuration: 0.05, thenDragTo: end)
-        XCTAssertNotEqual(value("brightness"), afterTap, "swiping down on the light dims it further")
+        drag(fromX: 0.5, y: 0.08, toX: 0.5, y: 0.30)
+        let afterSwipeDown = percent("brightness")
+        XCTAssertLessThan(afterSwipeDown, afterTap, "swiping down on the light dims it")
+
+        drag(fromX: 0.5, y: 0.30, toX: 0.5, y: 0.10)
+        XCTAssertGreaterThan(percent("brightness"), afterSwipeDown, "swiping up makes it brighter")
     }
 
     func testWhiteToneSliderChangesTheColor() {
@@ -134,13 +138,13 @@ final class ScreenlightUITests: XCTestCase {
     // MARK: - Timer
 
     func testTimerSwitchesTheLightOffAndBrightnessSurvives() {
-        launch(extra: ["-uiTestSecondsPerMinute", "4"])
+        launch(extra: ["-uiTestSecondsPerMinute", "8"])
         element("tab.timer").tap()
         element("timer.1").tap()
         XCTAssertTrue(element("timer.stop").waitForExistence(timeout: 2))
         let off = NSPredicate(format: "value == 'Off'")
         expectation(for: off, evaluatedWith: element("power"))
-        waitForExpectations(timeout: 10)
+        waitForExpectations(timeout: 30)
         XCTAssertFalse(element("timer.stop").exists)
         element("power").tap()
         XCTAssertEqual(value("power"), "On")
@@ -163,12 +167,12 @@ final class ScreenlightUITests: XCTestCase {
     }
 
     func testTimerHidesControlsThenBringsThemBack() {
-        launch(extra: ["-uiTestSecondsPerMinute", "4"])
+        launch(extra: ["-uiTestSecondsPerMinute", "20"])
         element("tab.timer").tap()
         element("timer.1").tap()
         element("lightOnly").tap()
         XCTAssertTrue(element("power").waitForNonExistence(timeout: 3))
-        XCTAssertTrue(element("power").waitForExistence(timeout: 10), "controls return when the timer ends")
+        XCTAssertTrue(element("power").waitForExistence(timeout: 40), "controls return when the timer ends")
         XCTAssertEqual(value("power"), "Off")
     }
 
@@ -225,7 +229,9 @@ final class ScreenlightUITests: XCTestCase {
         launch()
         XCUIDevice.shared.orientation = .landscapeLeft
         sleep(1)
-        XCTAssertTrue(element("power").isHittable || scrollTo("power"))
+        for identifier in ["tab.color", "tab.mode", "tab.timer", "brightness", "lightOnly", "power"] {
+            XCTAssertTrue(element(identifier).isHittable || scrollTo(identifier), "\(identifier) in landscape")
+        }
         element("power").tap()
         XCTAssertEqual(value("power"), "Off")
         XCUIDevice.shared.orientation = .portrait
@@ -253,6 +259,49 @@ final class ScreenlightUITests: XCTestCase {
         }
         XCTAssertEqual(element("brightness").label, "Brightness")
         XCTAssertEqual(element("surface").label, "Light")
+    }
+
+    func testControlsCannotBeHiddenWhileTheLightIsOff() {
+        launch()
+        element("power").tap()
+        XCTAssertEqual(value("power"), "Off")
+        element("lightOnly").tap()
+        XCTAssertTrue(element("power").exists, "Light only must not leave a black screen")
+        element("surface").coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.1)).tap()
+        XCTAssertTrue(element("power").exists, "a tap on the dark screen must not hide the controls")
+    }
+
+    func testTappingTheSelectedModeTurnsTheLightOn() {
+        launch()
+        element("power").tap()
+        element("tab.mode").tap()
+        element("mode.Normal").tap()
+        XCTAssertEqual(value("power"), "On")
+    }
+
+    func testFavoritesFromVersionOneAreKept() {
+        // Version 1.0 stored favourites as JSON with exactly these fields.
+        launch(extra: ["-uiTestLegacyFavorites", "YES"])
+        XCTAssertTrue(element("favorite.#3399FF").waitForExistence(timeout: 5))
+        XCTAssertEqual(element("favorite.#3399FF").label, "Sky")
+    }
+
+    func testFavoriteHasASpokenColorName() {
+        launch()
+        element("swatch.#0D66FF").tap()
+        element("favorite.save").tap()
+        XCTAssertEqual(element("favorite.#0D66FF").label, "Blue")
+    }
+
+    private func drag(fromX: CGFloat, y fromY: CGFloat, toX: CGFloat, y toY: CGFloat) {
+        let surface = element("surface")
+        let start = surface.coordinate(withNormalizedOffset: CGVector(dx: fromX, dy: fromY))
+        let end = surface.coordinate(withNormalizedOffset: CGVector(dx: toX, dy: toY))
+        start.press(forDuration: 0.05, thenDragTo: end)
+    }
+
+    private func percent(_ identifier: String) -> Int {
+        Int(value(identifier).filter(\.isNumber)) ?? -1
     }
 
     /// Scrolls the panel (used when it does not fit on screen) until the element can be tapped.

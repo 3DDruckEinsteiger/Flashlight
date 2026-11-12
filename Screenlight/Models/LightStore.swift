@@ -55,6 +55,12 @@ final class LightStore: ObservableObject {
     #if DEBUG
     /// Launch arguments used to stage App Store screenshots and UI tests.
     private func applyScreenshotArguments() {
+        if defaults.bool(forKey: "uiTestLegacyFavorites") {
+            // Exactly what version 1.0 wrote, to prove the update keeps it.
+            let legacy = #"[{"id":"7C9E6679-7425-40DE-944B-E07FC1F90AE7","name":"Sky","red":0.2,"green":0.6,"blue":1}]"#
+            defaults.set(Data(legacy.utf8), forKey: Key.favorites)
+            loadFavorites()
+        }
         if let list = defaults.string(forKey: "uiTestFavorites") {
             favorites = list.split(separator: ",").compactMap { LightColor(hex: String($0)) }
                 .map { FavoriteColor(name: $0.hex, color: $0) }
@@ -72,10 +78,10 @@ final class LightStore: ObservableObject {
     }
 
     func setMode(_ newMode: LightMode) {
+        if !isOn { isOn = true }
         guard newMode != mode else { return }
         mode = newMode
         modeStart = Date()
-        if !isOn { isOn = true }
         Haptics.selection()
         scheduleSave()
     }
@@ -162,14 +168,19 @@ final class LightStore: ObservableObject {
     private func scheduleTimerTask(until end: Date) {
         timerTask?.cancel()
         timerTask = Task { [weak self] in
-            let seconds = max(0, end.timeIntervalSinceNow)
-            try? await Task.sleep(nanoseconds: UInt64(seconds * 1_000_000_000))
-            guard !Task.isCancelled else { return }
-            self?.finishTimer()
+            // Sleep in short steps and compare with the clock: a suspended app or a
+            // sleeping Mac must not delay the switch-off beyond the next wake-up.
+            while !Task.isCancelled, end.timeIntervalSinceNow > 0 {
+                let step = min(end.timeIntervalSinceNow, 15)
+                try? await Task.sleep(nanoseconds: UInt64(max(0.05, step) * 1_000_000_000))
+            }
+            guard !Task.isCancelled, let self, self.timerEnd == end else { return }
+            self.finishTimer()
         }
     }
 
     private func finishTimer() {
+        timerTask?.cancel()
         timerTask = nil
         timerEnd = nil
         isOn = false
@@ -194,9 +205,11 @@ final class LightStore: ObservableObject {
         favorites.remove(at: index)
         removedFavorite = (favorite, index)
         saveFavorites()
+        Accessibility.announce(String(localized: "Favorite removed"))
+        let seconds: UInt64 = Accessibility.isVoiceOverRunning ? 20 : 6
         undoTask?.cancel()
         undoTask = Task { [weak self] in
-            try? await Task.sleep(nanoseconds: 6_000_000_000)
+            try? await Task.sleep(nanoseconds: seconds * 1_000_000_000)
             guard !Task.isCancelled else { return }
             self?.removedFavorite = nil
         }
@@ -204,7 +217,9 @@ final class LightStore: ObservableObject {
 
     func undoRemoveFavorite() {
         guard let removed = removedFavorite else { return }
-        favorites.insert(removed.favorite, at: min(removed.index, favorites.count))
+        if !favorites.contains(where: { $0.lightColor.isClose(to: removed.favorite.lightColor) }) {
+            favorites.insert(removed.favorite, at: min(removed.index, favorites.count))
+        }
         removedFavorite = nil
         undoTask?.cancel()
         Haptics.selection()
@@ -281,6 +296,10 @@ final class LightStore: ObservableObject {
         if let rgb = defaults.array(forKey: Key.gradientEnd) as? [Double], rgb.count == 3 {
             gradientEnd = LightColor(red: rgb[0], green: rgb[1], blue: rgb[2])
         }
+        loadFavorites()
+    }
+
+    private func loadFavorites() {
         if let data = defaults.data(forKey: Key.favorites),
            let decoded = try? JSONDecoder().decode([FavoriteColor].self, from: data) {
             favorites = decoded

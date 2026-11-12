@@ -28,7 +28,9 @@ enum LightMode: String, CaseIterable, Codable, Identifiable {
         case .sos: return "light.beacon.max.fill"
         case .candle: return "flame.fill"
         case .disco: return "sparkles"
-        case .rainbow: return "rainbow"
+        case .rainbow:
+            if #available(iOS 17, macOS 14, *) { return "rainbow" }
+            return "swatchpalette.fill"
         case .gradient: return "circle.lefthalf.filled"
         }
     }

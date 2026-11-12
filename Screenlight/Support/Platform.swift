@@ -34,6 +34,39 @@ enum Haptics {
     }
 }
 
+/// Launch flags for UI tests and staged screenshots. Always false in release builds.
+enum DebugLaunch {
+    static func flag(_ name: String) -> Bool {
+        #if DEBUG
+        UserDefaults.standard.bool(forKey: name)
+        #else
+        false
+        #endif
+    }
+}
+
+/// Spoken feedback for VoiceOver users.
+@MainActor
+enum Accessibility {
+    static var isVoiceOverRunning: Bool {
+        #if os(iOS)
+        UIAccessibility.isVoiceOverRunning
+        #else
+        NSWorkspace.shared.isVoiceOverEnabled
+        #endif
+    }
+
+    static func announce(_ text: String) {
+        #if os(iOS)
+        UIAccessibility.post(notification: .announcement, argument: text)
+        #else
+        guard let window = NSApp.mainWindow else { return }
+        NSAccessibility.post(element: window, notification: .announcementRequested,
+                             userInfo: [.announcement: text, .priority: NSAccessibilityPriorityLevel.high.rawValue])
+        #endif
+    }
+}
+
 /// Things a flashlight needs from the device while it is shining:
 /// a display that stays awake and – on iPhone and iPad – full screen brightness.
 /// Everything is handed back as soon as the light is off or the app leaves the foreground.
@@ -61,7 +94,11 @@ enum DeviceControl {
             }
             screen.brightness = 1
         } else if let previous = brightnessBeforeLight {
-            screen.brightness = previous
+            // Only hand the old value back if the user has not changed the
+            // brightness themselves in the meantime (Control Centre).
+            if screen.brightness > 0.98 {
+                screen.brightness = previous
+            }
             brightnessBeforeLight = nil
         }
         #else

@@ -94,6 +94,7 @@ struct ControlPanel: View {
                     }
                 }
                 .buttonStyle(ChipStyle(isSelected: selectedTab == tab))
+                .accessibilityLabel(Text(tab.title))
                 .accessibilityIdentifier("tab.\(tab.rawValue)")
                 .accessibilityAddTraits(selectedTab == tab ? [.isSelected] : [])
             }
@@ -178,13 +179,15 @@ struct ControlPanel: View {
             Label("Favorite removed", systemImage: "trash")
                 .font(.subheadline)
             Spacer(minLength: 8)
-            Button("Undo") {
+            Button {
                 store.undoRemoveFavorite()
+            } label: {
+                Text("Undo")
+                    .font(.subheadline.weight(.bold))
+                    .padding(.horizontal, 12)
+                    .frame(minWidth: Metrics.touchTarget, minHeight: Metrics.touchTarget)
+                    .contentShape(Rectangle())
             }
-            .font(.subheadline.weight(.bold))
-            .padding(.horizontal, 12)
-            .frame(minHeight: Metrics.touchTarget)
-            .contentShape(Rectangle())
             .buttonStyle(.plain)
             .accessibilityIdentifier("undo")
         }

@@ -32,15 +32,18 @@ struct ColorSection: View {
                 HStack(spacing: 12) {
                     Image(systemName: "flame.fill")
                         .foregroundStyle(LightColor.warmWhite.color)
+                        .accessibilityHidden(true)
                     LightSlider(
                         value: Binding(get: { store.whiteTone }, set: { store.setWhiteTone($0) }),
                         kind: .gradient([LightColor.warmWhite.color, .white, LightColor.coolWhite.color]),
+                        step: 0.25,
                         label: Text("White tone"),
                         valueText: whiteToneDescription
                     )
                     .accessibilityIdentifier("whiteTone")
                     Image(systemName: "snowflake")
                         .foregroundStyle(LightColor.coolWhite.color)
+                        .accessibilityHidden(true)
                 }
                 .accessibilityElement(children: .contain)
             }
@@ -86,12 +89,16 @@ struct ColorSection: View {
 
     private var favorites: some View {
         VStack(spacing: 4) {
+            #if os(macOS)
+            SectionTitle("Favorites · right-click to remove")
+            #else
             SectionTitle("Favorites · touch and hold to remove")
+            #endif
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 8) {
                     ForEach(store.favorites) { favorite in
                         Swatch(color: favorite.lightColor,
-                               name: favorite.name,
+                               name: favorite.spokenName,
                                isSelected: store.mode.usesSelectedColor && store.color.isClose(to: favorite.lightColor)) {
                             store.select(favorite.lightColor)
                         }

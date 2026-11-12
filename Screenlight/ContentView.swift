@@ -6,11 +6,13 @@ struct ContentView: View {
 
     @Environment(\.scenePhase) private var scenePhase
     @Environment(\.verticalSizeClass) private var verticalSizeClass
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @GestureState private var isDragging = false
 
-    @State private var panelVisible = !UserDefaults.standard.bool(forKey: "startLightOnly")
+    @State private var panelVisible = !DebugLaunch.flag("startLightOnly")
     @State private var dragAxis: Axis?
     @State private var dragStartBrightness = 1.0
-    @State private var hudVisible = UserDefaults.standard.bool(forKey: "uiTestShowHUD")
+    @State private var hudVisible = DebugLaunch.flag("uiTestShowHUD")
     @State private var hudTask: Task<Void, Never>?
     @AppStorage("hintDismissed") private var hintDismissed = false
     #if os(macOS)
@@ -26,6 +28,10 @@ struct ContentView: View {
                 .contentShape(Rectangle())
                 .gesture(surfaceDrag)
                 .onTapGesture { setPanelVisible(!panelVisible) }
+                .onValueChange(of: isDragging) { dragging in
+                    // A cancelled drag never reaches onEnded; start the next one clean.
+                    if !dragging { dragAxis = nil }
+                }
                 .accessibilityElement()
                 .accessibilityLabel(Text("Light"))
                 .accessibilityValue(store.isOn ? Text("On") : Text("Off"))
@@ -48,7 +54,7 @@ struct ContentView: View {
                 if panelVisible {
                     ControlPanel(store: store) { setPanelVisible(false, fillDisplay: true) }
                         .frame(maxWidth: Metrics.panelMaxWidth)
-                        .transition(.move(edge: .bottom).combined(with: .opacity))
+                        .transition(reduceMotion ? .opacity : .move(edge: .bottom).combined(with: .opacity))
                 }
             }
             .frame(maxWidth: .infinity, alignment: isCompactHeight ? .trailing : .center)
@@ -57,14 +63,14 @@ struct ContentView: View {
         }
         .background(Color.black.ignoresSafeArea())
         .preferredColorScheme(systemScheme)
-        .onAppear { updateDevice() }
+        .onAppear { updateDevice(phase: scenePhase) }
         .onValueChange(of: store.isOn) { isOn in
-            updateDevice()
+            updateDevice(phase: scenePhase)
             // Never leave the user with a black screen and no controls.
             if !isOn { setPanelVisible(true) }
         }
         .onValueChange(of: scenePhase) { phase in
-            updateDevice()
+            updateDevice(phase: phase)
             if phase == .active {
                 store.refreshTimer()
             } else {
@@ -80,11 +86,11 @@ struct ContentView: View {
         .focusEffectDisabled()
         .focused($isFocused)
         .onAppear { isFocused = true }
-        .onKeyPress(.leftArrow) { store.stepColor(by: -1); return .handled }
-        .onKeyPress(.rightArrow) { store.stepColor(by: 1); return .handled }
+        .onKeyPress(.leftArrow, phases: .down) { _ in store.stepColor(by: -1); return .handled }
+        .onKeyPress(.rightArrow, phases: .down) { _ in store.stepColor(by: 1); return .handled }
         .onKeyPress(.upArrow) { adjustBrightness(by: 0.1); return .handled }
         .onKeyPress(.downArrow) { adjustBrightness(by: -0.1); return .handled }
-        .onKeyPress(.space) { store.togglePower(); return .handled }
+        .onKeyPress(.space, phases: .down) { _ in store.togglePower(); return .handled }
         .onKeyPress(.escape) {
             guard !panelVisible else { return .ignored }
             setPanelVisible(true)
@@ -103,14 +109,16 @@ struct ContentView: View {
 
     // MARK: - Device
 
-    private func updateDevice() {
-        DeviceControl.setLightActive(store.isOn && scenePhase != .background)
+    private func updateDevice(phase: ScenePhase) {
+        DeviceControl.setLightActive(store.isOn && phase != .background)
     }
 
     /// - Parameter fillDisplay: On the Mac, "Light only" also switches the window to full screen.
     ///   A plain click on the light only shows or hides the controls.
-    private func setPanelVisible(_ visible: Bool, fillDisplay: Bool = false) {
-        withAnimation(.easeInOut(duration: 0.25)) {
+    private func setPanelVisible(_ requested: Bool, fillDisplay: Bool = false) {
+        // Never leave a black screen without controls: they stay while the light is off.
+        let visible = requested || !store.isOn
+        withAnimation(reduceMotion ? nil : .easeInOut(duration: 0.25)) {
             panelVisible = visible
         }
         #if os(macOS)
@@ -131,6 +139,7 @@ struct ContentView: View {
     /// Up/down changes the brightness continuously, left/right steps through the colours.
     private var surfaceDrag: some Gesture {
         DragGesture(minimumDistance: 16)
+            .updating($isDragging) { _, state, _ in state = true }
             .onChanged { drag in
                 guard store.isOn else { return }
                 if dragAxis == nil {
@@ -144,10 +153,12 @@ struct ContentView: View {
                 }
             }
             .onEnded { drag in
-                if dragAxis == .horizontal, abs(drag.translation.width) > 40, store.isOn {
+                let horizontal = abs(drag.translation.width) > abs(drag.translation.height)
+                if dragAxis ?? (horizontal ? .horizontal : .vertical) == .horizontal,
+                   abs(drag.translation.width) > 40, store.isOn {
                     store.stepColor(by: drag.translation.width < 0 ? 1 : -1)
                 }
-                if dragAxis != nil { hintDismissed = true }
+                hintDismissed = true
                 dragAxis = nil
             }
     }
