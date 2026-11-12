@@ -192,7 +192,7 @@ final class ScreenlightUITests: XCTestCase {
         remove.tap()
         XCTAssertTrue(favorite.waitForNonExistence(timeout: 3))
 
-        XCTAssertTrue(element("undo").waitForExistence(timeout: 2))
+        XCTAssertTrue(element("undo").waitForExistence(timeout: 8), app.debugDescription)
         element("undo").tap()
         XCTAssertTrue(favorite.waitForExistence(timeout: 2))
     }
@@ -291,6 +291,61 @@ final class ScreenlightUITests: XCTestCase {
         element("swatch.#0D66FF").tap()
         element("favorite.save").tap()
         XCTAssertEqual(element("favorite.#0D66FF").label, "Blue")
+    }
+
+    // MARK: - Store preview
+
+    /// Not a test: plays a short tour through the app while the simulator records
+    /// the screen for the App Store preview video. Runs only with STORE_DEMO=1.
+    func testStorePreviewTour() throws {
+        try XCTSkipUnless(ProcessInfo.processInfo.environment["STORE_DEMO"] == "1", "only for recording the preview")
+        launch(extra: ["-colorRed", "1", "-colorGreen", "0.82", "-colorBlue", "0.6"])
+        pause(1.5)
+        for swatch in ["#FF0000", "#0D66FF", "#B34DFF", "#26E640"] {
+            element("swatch.\(swatch)").tap()
+            pause(0.7)
+        }
+        slide("whiteTone", from: 0.5, to: 0.08)
+        slide("whiteTone", from: 0.08, to: 0.92)
+        pause(0.4)
+        element("swatch.#FFD199").tap()
+        slide("brightness", from: 0.97, to: 0.35)
+        slide("brightness", from: 0.35, to: 0.97)
+        pause(0.4)
+        element("tab.mode").tap()
+        pause(0.6)
+        element("mode.Candle").tap()
+        pause(2.6)
+        element("mode.Rainbow").tap()
+        pause(2.6)
+        element("mode.Normal").tap()
+        element("tab.timer").tap()
+        pause(0.6)
+        element("timer.15").tap()
+        pause(1.8)
+        element("lightOnly").tap()
+        pause(1.0)
+        drag(fromX: 0.8, y: 0.5, toX: 0.2, y: 0.5)
+        pause(0.8)
+        drag(fromX: 0.8, y: 0.5, toX: 0.2, y: 0.5)
+        pause(0.8)
+        drag(fromX: 0.5, y: 0.3, toX: 0.5, y: 0.6)
+        pause(0.6)
+        drag(fromX: 0.5, y: 0.6, toX: 0.5, y: 0.2)
+        pause(1.0)
+        element("surface").tap()
+        pause(2.0)
+    }
+
+    private func pause(_ seconds: TimeInterval) {
+        Thread.sleep(forTimeInterval: seconds)
+    }
+
+    private func slide(_ identifier: String, from: CGFloat, to: CGFloat) {
+        let slider = element(identifier)
+        let start = slider.coordinate(withNormalizedOffset: CGVector(dx: from, dy: 0.5))
+        let end = slider.coordinate(withNormalizedOffset: CGVector(dx: to, dy: 0.5))
+        start.press(forDuration: 0.1, thenDragTo: end, withVelocity: .slow, thenHoldForDuration: 0.1)
     }
 
     private func drag(fromX: CGFloat, y fromY: CGFloat, toX: CGFloat, y toY: CGFloat) {

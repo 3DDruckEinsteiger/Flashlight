@@ -34,7 +34,7 @@ DEVICES = {
     "mac": {"size": (2880, 1800), "radius": 0.022, "set": "APP_DESKTOP"},
 }
 # Lichtfarbe hinter dem Screenshot, passend zum Motiv.
-GLOW = ["ffd199", "b24dff", "ff8a2a", "0d66ff", "ff2a2a"]
+GLOW = ["ffd199", "b24dff", "ff8a2a", "0d66ff", "33d9ff"]
 RTL = {"ar", "he", "ur"}
 # Schriften für Schriftsysteme, die Inter nicht abdeckt (alle unter SIL OFL, siehe Store/medien/schrift).
 FONTS = {

@@ -126,8 +126,9 @@ struct LightSlider: View {
                     }
                 case .gradient(let colors):
                     Capsule()
-                        .fill(LinearGradient(colors: layoutDirection == .rightToLeft ? colors.reversed() : colors,
-                                             startPoint: .leading, endPoint: .trailing))
+                        // .leading/.trailing follow the layout direction, so the warm end
+                        // stays next to the flame icon in right-to-left languages (checked in Arabic).
+                        .fill(LinearGradient(colors: colors, startPoint: .leading, endPoint: .trailing))
                         .padding(.vertical, 8)
                     Circle()
                         .fill(Color.white)
