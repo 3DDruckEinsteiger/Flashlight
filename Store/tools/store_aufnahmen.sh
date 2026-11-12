@@ -15,10 +15,17 @@ fi
 app=com.amim.Flashlight
 wait_time=${SHOT_WAIT:-3}
 
+# Optional: MOTIVE="03 05" nimmt nur diese Motive neu auf; STATUSLEISTE=aus blendet die
+# Statusleiste aus (auf dem iPad zeigt sie das Datum in der Systemsprache des Simulators).
+motive=${MOTIVE:-"01 02 03 04 05"}
+extra=()
+[ "${STATUSLEISTE:-an}" = "aus" ] && extra=(-uiTestHideStatusBar YES)
+
 shoot() {  # shoot <datei> <startparameter...>
   local file=$1; shift
+  [[ " $motive " == *" ${file:t:r} "* ]] || return 0
   xcrun simctl terminate "$device" $app >/dev/null 2>&1
-  xcrun simctl launch "$device" $app -uiTestReset YES "$@" >/dev/null || return 1
+  xcrun simctl launch "$device" $app -uiTestReset YES $extra "$@" >/dev/null || return 1
   sleep $wait_time
   xcrun simctl io "$device" screenshot "$file" >/dev/null 2>&1
 }

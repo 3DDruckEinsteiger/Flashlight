@@ -74,7 +74,7 @@ struct ContentView: View {
             }
         }
         #if os(iOS)
-        .statusBarHidden(!panelVisible)
+        .statusBarHidden(!panelVisible || DebugLaunch.flag("uiTestHideStatusBar"))
         .persistentSystemOverlays(panelVisible ? .automatic : .hidden)
         #else
         .frame(minWidth: 420, minHeight: 640)

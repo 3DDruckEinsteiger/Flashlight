@@ -20,6 +20,7 @@
 		A1000001017 /* LightSurface.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000002017 /* LightSurface.swift */; };
 		A1000001020 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = A1000002020 /* Localizable.xcstrings */; };
 		B1000001001 /* ScreenlightUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000002001 /* ScreenlightUITests.swift */; };
+		A1000001021 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = A1000002021 /* PrivacyInfo.xcprivacy */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -38,6 +39,7 @@
 		A1000002020 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 		B1000002001 /* ScreenlightUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenlightUITests.swift; sourceTree = "<group>"; };
 		B1000003001 /* ScreenlightUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ScreenlightUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		A1000002021 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -77,6 +79,7 @@
 				A1000002002 /* ContentView.swift */,
 				A1000002003 /* Assets.xcassets */,
 				A1000002020 /* Localizable.xcstrings */,
+				A1000002021 /* PrivacyInfo.xcprivacy */,
 			);
 			path = "Screenlight";
 			sourceTree = "<group>";
@@ -258,6 +261,7 @@
 			files = (
 				A1000001003 /* Assets.xcassets in Resources */,
 				A1000001020 /* Localizable.xcstrings in Resources */,
+				A1000001021 /* PrivacyInfo.xcprivacy in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -24,7 +24,7 @@ enum LightMode: String, CaseIterable, Codable, Identifiable {
 
     var symbol: String {
         switch self {
-        case .normal: return "flashlight.on.fill"
+        case .normal: return "lightbulb.fill"
         case .sos: return "light.beacon.max.fill"
         case .candle: return "flame.fill"
         case .disco: return "sparkles"

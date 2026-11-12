@@ -95,7 +95,7 @@
     await document.fonts.load(`750 40px "Inter"`);
     let size = bandH * (portrait ? 0.30 : 0.36);
     // At most two lines, and never taller than the band.
-    const fits = () => head.scrollHeight <= Math.min(bandH * 0.80, size * lineHeight * 2.2) && head.scrollWidth <= W * 0.86 + 1;
+    const fits = () => head.scrollHeight <= Math.min(bandH * (lineHeight > 1.8 ? 0.72 : 0.80), size * lineHeight * 2.2) && head.scrollWidth <= W * 0.86 + 1;
     head.style.fontSize = size + "px";
     while (!fits() && size > 20) { size -= 2; head.style.fontSize = size + "px"; }
   }

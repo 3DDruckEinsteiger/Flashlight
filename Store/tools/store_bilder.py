@@ -49,7 +49,7 @@ FONTS = {
 
 
 # Zeilenhöhe für Schriften mit hohen Ober- und Unterlängen.
-TALL = {"ur": 1.9, "ar": 1.35, "th": 1.35, "hi": 1.3, "mr": 1.3, "bn": 1.3, "gu": 1.3, "pa": 1.3,
+TALL = {"ur": 2.1, "ar": 1.35, "th": 1.35, "hi": 1.3, "mr": 1.3, "bn": 1.3, "gu": 1.3, "pa": 1.3,
         "kn": 1.3, "ml": 1.3, "or": 1.3, "ta": 1.3, "te": 1.3}
 
 
@@ -80,12 +80,12 @@ def main() -> int:
         return 1
     raw_root, out_root = pathlib.Path(sys.argv[1]), pathlib.Path(sys.argv[2])
     wanted = sys.argv[3:] or sorted(p.name for p in raw_root.iterdir() if p.is_dir())
-    english = json.loads((LOC / "en.json").read_text(encoding="utf-8"))["shots"]
+    import build_strings
+    all_languages = build_strings.load()
+    english = all_languages["en"]["shots"]
     count = 0
     for language in wanted:
-        source = LOC / f"{language}.json"
-        base = language if source.exists() else "en"
-        data = json.loads((LOC / f"{base}.json").read_text(encoding="utf-8"))
+        data = all_languages[language]  # includes the derived en-GB, en-AU, en-CA
         for name, device in DEVICES.items():
             # Der Mac hat eigene Überschriften, wo die Bedienung abweicht (Tasten statt Wischen).
             heads = (data.get("shots_mac") if name == "mac" else None) or data.get("shots") or english
