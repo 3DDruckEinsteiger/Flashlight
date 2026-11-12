@@ -1,692 +1,221 @@
 import SwiftUI
 
-#if os(macOS)
-import AppKit
-#else
-import UIKit
-#endif
-
+/// Root view: the light fills the screen, the controls float above it.
 struct ContentView: View {
-    @StateObject private var manager = ScreenlightManager()
-    @State private var showSettings = false
-    @State private var showFavorites = false
-    @State private var newFavoriteName = ""
-    @State private var showAddFavorite = false
-    @State private var selectedTab = 0
-    @FocusState private var isFocused: Bool
+    @ObservedObject var store: LightStore
 
-    // Base font size for better readability
-    private let baseFontSize: CGFloat = 18
+    @Environment(\.scenePhase) private var scenePhase
+    @Environment(\.verticalSizeClass) private var verticalSizeClass
+
+    @State private var panelVisible = !UserDefaults.standard.bool(forKey: "startLightOnly")
+    @State private var dragAxis: Axis?
+    @State private var dragStartBrightness = 1.0
+    @State private var hudVisible = false
+    @State private var hudTask: Task<Void, Never>?
+    @AppStorage("hintDismissed") private var hintDismissed = false
+    #if os(macOS)
+    @FocusState private var isFocused: Bool
+    #endif
+
+    private var isCompactHeight: Bool { verticalSizeClass == .compact }
 
     var body: some View {
         ZStack {
-            // Background - the actual flashlight
-            manager.displayColor
-                .ignoresSafeArea()
-                #if os(iOS)
-                .gesture(swipeGestures)
-                #endif
-                .onTapGesture {
-                    // Nur im Vollbild kann man Controls togglen
-                    if manager.isFullScreen {
-                        withAnimation(.easeInOut(duration: 0.3)) {
-                            manager.showControls.toggle()
-                        }
-                    }
-                }
+            LightSurface(store: store)
+                .contentShape(Rectangle())
+                .gesture(surfaceDrag)
+                .onTapGesture { setPanelVisible(!panelVisible) }
+                .accessibilityElement()
+                .accessibilityLabel(Text("Light"))
+                .accessibilityValue(store.isOn ? Text("On") : Text("Off"))
+                .accessibilityHint(Text("Double tap to show or hide the controls."))
+                .accessibilityAddTraits(.isButton)
 
-            // Controls overlay - zeige Controls wenn:
-            // 1. Nicht im Vollbild (immer anzeigen)
-            // 2. Im Vollbild und showControls ist true
-            if !manager.isFullScreen || manager.showControls {
-                controlsOverlay
+            if hudVisible {
+                brightnessHUD
                     .transition(.opacity)
+                    .allowsHitTesting(false)
             }
-        }
-        .preferredColorScheme(.dark)
-        #if os(iOS)
-        .statusBarHidden(manager.isFullScreen && !manager.showControls)
-        #endif
-        #if os(macOS)
-        .frame(minWidth: 500, minHeight: 600)
-        .focusable()
-        .focused($isFocused)
-        .onAppear {
-            // Focus setzen damit Tastatureingaben funktionieren
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                isFocused = true
-            }
-        }
-        .onKeyPress(.leftArrow) {
-            manager.previousColor()
-            return .handled
-        }
-        .onKeyPress(.rightArrow) {
-            manager.nextColor()
-            return .handled
-        }
-        .onKeyPress(.upArrow) {
-            manager.increaseBrightness()
-            return .handled
-        }
-        .onKeyPress(.downArrow) {
-            manager.decreaseBrightness()
-            return .handled
-        }
-        .onKeyPress(.space) {
-            withAnimation {
-                toggleFullScreen()
-            }
-            return .handled
-        }
-        .onKeyPress(.escape) {
-            if manager.isFullScreen {
-                withAnimation {
-                    exitFullScreen()
+
+            VStack(spacing: 12) {
+                if panelVisible, store.isOn, !hintDismissed, !isCompactHeight {
+                    hint
+                        .transition(.opacity)
+                }
+                Spacer(minLength: 0)
+                if panelVisible {
+                    ControlPanel(store: store) { setPanelVisible(false) }
+                        .frame(maxWidth: Metrics.panelMaxWidth)
+                        .transition(.move(edge: .bottom).combined(with: .opacity))
                 }
             }
-            return .handled
+            .frame(maxWidth: .infinity, alignment: isCompactHeight ? .trailing : .center)
+            .padding(.horizontal, 12)
+            .padding(.vertical, 8)
         }
-        #endif
-    }
-
-    #if os(macOS)
-    func toggleFullScreen() {
-        manager.isFullScreen.toggle()
-        if let window = NSApplication.shared.windows.first {
-            window.toggleFullScreen(nil)
+        .background(Color.black.ignoresSafeArea())
+        .preferredColorScheme(systemScheme)
+        .onAppear { updateDevice() }
+        .onValueChange(of: store.isOn) { isOn in
+            updateDevice()
+            // Never leave the user with a black screen and no controls.
+            if !isOn { setPanelVisible(true) }
         }
-        if manager.isFullScreen {
-            // Im Vollbild: Controls nach 2 Sekunden ausblenden
-            manager.showControls = true
-            DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
-                if manager.isFullScreen {
-                    withAnimation {
-                        manager.showControls = false
-                    }
-                }
-            }
-        } else {
-            manager.showControls = true
-        }
-    }
-
-    func exitFullScreen() {
-        manager.isFullScreen = false
-        manager.showControls = true
-        if let window = NSApplication.shared.windows.first {
-            if window.styleMask.contains(.fullScreen) {
-                window.toggleFullScreen(nil)
-            }
-        }
-    }
-    #endif
-
-    // MARK: - Swipe Gestures (iOS)
-    #if os(iOS)
-    var swipeGestures: some Gesture {
-        DragGesture(minimumDistance: 30)
-            .onEnded { value in
-                let horizontal = value.translation.width
-                let vertical = value.translation.height
-
-                if abs(horizontal) > abs(vertical) {
-                    // Horizontal swipe
-                    if horizontal > 0 {
-                        manager.nextColor()
-                    } else {
-                        manager.previousColor()
-                    }
-                } else {
-                    // Vertical swipe
-                    if vertical < 0 {
-                        manager.increaseBrightness()
-                    } else {
-                        manager.decreaseBrightness()
-                    }
-                }
-            }
-    }
-    #endif
-
-    // MARK: - Controls Overlay
-    var controlsOverlay: some View {
-        VStack(spacing: 0) {
-            // Header - nur wenn nicht im Vollbild
-            if !manager.isFullScreen {
-                headerView
-            }
-
-            // Main content
-            ScrollView {
-                VStack(spacing: 16) {
-                    // Tab selector
-                    tabSelector
-
-                    // Tab content
-                    Group {
-                        switch selectedTab {
-                        case 0:
-                            colorsTab
-                        case 1:
-                            modesTab
-                        case 2:
-                            settingsTab
-                        default:
-                            colorsTab
-                        }
-                    }
-                    .padding(.horizontal)
-                }
-                .padding(.vertical)
-            }
-
-            // Bottom controls
-            bottomControls
-        }
-        .background(
-            Rectangle()
-                .fill(Color.black.opacity(0.85))
-                .ignoresSafeArea()
-        )
-    }
-
-    // MARK: - Header
-    var headerView: some View {
-        VStack(spacing: 8) {
-            Text("Screenlight Mobile")
-                .font(.system(size: 32, weight: .bold))
-
-            #if os(iOS)
-            Text("Swipe to change color/brightness")
-                .font(.system(size: 16))
-                .foregroundColor(.secondary)
-            #else
-            Text("Use arrow keys to change color/brightness")
-                .font(.system(size: 16))
-                .foregroundColor(.secondary)
-            #endif
-
-            // Timer display
-            if manager.isTimerActive {
-                HStack {
-                    Image(systemName: "timer")
-                        .font(.system(size: baseFontSize))
-                    Text(manager.timerDisplay)
-                        .font(.system(size: baseFontSize, weight: .semibold))
-                        .monospacedDigit()
-                }
-                .foregroundColor(.orange)
-                .padding(.top, 4)
-            }
-        }
-        .padding(.top)
-    }
-
-    // MARK: - Tab Selector
-    var tabSelector: some View {
-        HStack(spacing: 0) {
-            tabButton(title: "Colors", icon: "paintpalette", index: 0)
-            tabButton(title: "Modes", icon: "wand.and.stars", index: 1)
-            tabButton(title: "Settings", icon: "gearshape", index: 2)
-        }
-        .background(
-            RoundedRectangle(cornerRadius: 12)
-                .fill(Color.black.opacity(0.2))
-        )
-        .padding(.horizontal)
-    }
-
-    func tabButton(title: String, icon: String, index: Int) -> some View {
-        Button(action: { selectedTab = index }) {
-            VStack(spacing: 6) {
-                Image(systemName: icon)
-                    .font(.system(size: 20))
-                Text(title)
-                    .font(.system(size: 14, weight: .medium))
-            }
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, 12)
-            .background(
-                RoundedRectangle(cornerRadius: 10)
-                    .fill(selectedTab == index ? Color.white.opacity(0.2) : Color.clear)
-            )
-        }
-        .buttonStyle(.plain)
-    }
-
-    // MARK: - Colors Tab
-    var colorsTab: some View {
-        VStack(spacing: 24) {
-            // Preset colors
-            VStack(alignment: .leading, spacing: 12) {
-                Text("Preset Colors")
-                    .font(.system(size: baseFontSize, weight: .semibold))
-
-                LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 12), count: 5), spacing: 12) {
-                    ForEach(Array(manager.presetColors.enumerated()), id: \.offset) { index, color in
-                        colorButton(color: color, index: index)
-                    }
-                }
-            }
-
-            // Custom color picker
-            HStack {
-                Text("Custom Color")
-                    .font(.system(size: baseFontSize))
-                Spacer()
-                ColorPicker("", selection: $manager.selectedColor, supportsOpacity: false)
-                    .labelsHidden()
-                    .frame(width: 50, height: 50)
-            }
-
-            // HEX input
-            HStack {
-                Text("HEX")
-                    .font(.system(size: baseFontSize))
-                TextField("#FFFFFF", text: $manager.hexInput)
-                    .font(.system(size: baseFontSize))
-                    .textFieldStyle(.roundedBorder)
-                    .frame(width: 120)
-                    #if os(iOS)
-                    .autocapitalization(.allCharacters)
-                    #endif
-                Button("Apply") {
-                    manager.applyHexColor()
-                }
-                .font(.system(size: 16))
-                .buttonStyle(.bordered)
-            }
-
-            // Warm/Cold slider
-            VStack(alignment: .leading, spacing: 10) {
-                HStack {
-                    Text("Color Temperature")
-                        .font(.system(size: baseFontSize))
-                    Spacer()
-                    Button("Apply") {
-                        manager.applyTemperature()
-                    }
-                    .font(.system(size: 16))
-                    .buttonStyle(.bordered)
-                }
-
-                HStack {
-                    Image(systemName: "flame")
-                        .font(.system(size: 20))
-                        .foregroundColor(.orange)
-                    Slider(value: $manager.colorTemperature)
-                    Image(systemName: "snowflake")
-                        .font(.system(size: 20))
-                        .foregroundColor(.cyan)
-                }
-            }
-
-            // Brightness slider
-            VStack(alignment: .leading, spacing: 10) {
-                HStack {
-                    Text("Brightness")
-                        .font(.system(size: baseFontSize))
-                    Spacer()
-                    Text("\(Int(manager.brightness * 100))%")
-                        .font(.system(size: baseFontSize))
-                        .monospacedDigit()
-                }
-
-                Slider(value: $manager.brightness, in: 0.1...1.0)
-                    .tint(manager.selectedColor)
-            }
-
-            // Favorites section
-            favoritesSection
-        }
-    }
-
-    func colorButton(color: Color, index: Int) -> some View {
-        Button(action: {
-            withAnimation(.easeInOut(duration: 0.2)) {
-                manager.currentPresetIndex = index
-                manager.selectedColor = color
-            }
-        }) {
-            Circle()
-                .fill(color)
-                .frame(width: 50, height: 50)
-                .overlay(
-                    Circle()
-                        .stroke(manager.currentPresetIndex == index ? Color.white : Color.clear, lineWidth: 3)
-                )
-                .shadow(color: .black.opacity(0.2), radius: 2)
-        }
-        .buttonStyle(.plain)
-    }
-
-    // MARK: - Favorites Section
-    var favoritesSection: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            HStack {
-                Text("Favorites")
-                    .font(.system(size: baseFontSize, weight: .semibold))
-                Spacer()
-                Button(action: { showAddFavorite = true }) {
-                    Image(systemName: "plus.circle")
-                        .font(.system(size: 24))
-                }
-                .buttonStyle(.plain)
-            }
-
-            if manager.favorites.isEmpty {
-                Text("No favorites yet")
-                    .foregroundColor(.secondary)
-                    .font(.system(size: 16))
+        .onValueChange(of: scenePhase) { phase in
+            updateDevice()
+            if phase == .active {
+                store.refreshTimer()
             } else {
-                LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 12), count: 5), spacing: 12) {
-                    ForEach(manager.favorites) { favorite in
-                        favoriteButton(favorite: favorite)
-                    }
+                store.saveNow()
+            }
+        }
+        #if os(iOS)
+        .statusBarHidden(!panelVisible)
+        .persistentSystemOverlays(panelVisible ? .automatic : .hidden)
+        #else
+        .frame(minWidth: 420, minHeight: 640)
+        .focusable()
+        .focusEffectDisabled()
+        .focused($isFocused)
+        .onAppear { isFocused = true }
+        .onKeyPress(.leftArrow) { store.stepColor(by: -1); return .handled }
+        .onKeyPress(.rightArrow) { store.stepColor(by: 1); return .handled }
+        .onKeyPress(.upArrow) { adjustBrightness(by: 0.1); return .handled }
+        .onKeyPress(.downArrow) { adjustBrightness(by: -0.1); return .handled }
+        .onKeyPress(.space) { store.togglePower(); return .handled }
+        .onKeyPress(.escape) {
+            guard !panelVisible else { return .ignored }
+            setPanelVisible(true)
+            return .handled
+        }
+        #endif
+    }
+
+    /// The status bar follows the system colour scheme, so the scheme follows
+    /// the light: dark clock on bright light, white clock on dark light.
+    /// The control panel itself is always dark.
+    private var systemScheme: ColorScheme {
+        guard store.isOn, !store.mode.isAnimated else { return .dark }
+        return store.color.scaled(by: store.brightness).luminance > 0.5 ? .light : .dark
+    }
+
+    // MARK: - Device
+
+    private func updateDevice() {
+        DeviceControl.setLightActive(store.isOn && scenePhase != .background)
+    }
+
+    private func setPanelVisible(_ visible: Bool) {
+        withAnimation(.easeInOut(duration: 0.25)) {
+            panelVisible = visible
+        }
+        #if os(macOS)
+        // "Light only" on the Mac also fills the whole display.
+        if !visible {
+            DeviceControl.setFullScreen(true)
+        } else if DeviceControl.isFullScreen {
+            DeviceControl.setFullScreen(false)
+        }
+        isFocused = true
+        #endif
+    }
+
+    // MARK: - Gestures on the light
+
+    /// Up/down changes the brightness continuously, left/right steps through the colours.
+    private var surfaceDrag: some Gesture {
+        DragGesture(minimumDistance: 16)
+            .onChanged { drag in
+                guard store.isOn else { return }
+                if dragAxis == nil {
+                    dragAxis = abs(drag.translation.width) > abs(drag.translation.height) ? .horizontal : .vertical
+                    dragStartBrightness = store.brightness
+                }
+                if dragAxis == .vertical {
+                    // A swipe across roughly 400 pt covers the whole range.
+                    store.setBrightness(dragStartBrightness - drag.translation.height / 400)
+                    showHUD()
                 }
             }
-        }
-        .alert("Add Favorite", isPresented: $showAddFavorite) {
-            TextField("Name", text: $newFavoriteName)
-            Button("Cancel", role: .cancel) {
-                newFavoriteName = ""
-            }
-            Button("Save") {
-                if !newFavoriteName.isEmpty {
-                    manager.addFavorite(name: newFavoriteName)
-                    newFavoriteName = ""
+            .onEnded { drag in
+                if dragAxis == .horizontal, abs(drag.translation.width) > 40, store.isOn {
+                    store.stepColor(by: drag.translation.width < 0 ? 1 : -1)
                 }
+                if dragAxis != nil { hintDismissed = true }
+                dragAxis = nil
             }
+    }
+
+    private func adjustBrightness(by amount: Double) {
+        store.stepBrightness(by: amount)
+        showHUD()
+    }
+
+    private func showHUD() {
+        guard !panelVisible else { return }
+        hudVisible = true
+        hudTask?.cancel()
+        hudTask = Task {
+            try? await Task.sleep(nanoseconds: 900_000_000)
+            guard !Task.isCancelled else { return }
+            withAnimation(.easeOut(duration: 0.3)) { hudVisible = false }
         }
     }
 
-    func favoriteButton(favorite: FavoriteColor) -> some View {
-        Button(action: {
-            manager.applyFavorite(favorite)
-        }) {
-            VStack(spacing: 6) {
-                Circle()
-                    .fill(favorite.color)
-                    .frame(width: 44, height: 44)
-                    .shadow(color: .black.opacity(0.2), radius: 2)
+    // MARK: - Overlays
 
-                Text(favorite.name)
-                    .font(.system(size: 14))
-                    .lineLimit(1)
-            }
-        }
-        .buttonStyle(.plain)
-        .contextMenu {
-            Button(role: .destructive) {
-                manager.removeFavorite(favorite)
-            } label: {
-                Label("Delete", systemImage: "trash")
-            }
-        }
+    private var brightnessHUD: some View {
+        Label(store.brightness.formatted(.percent.precision(.fractionLength(0))), systemImage: "sun.max.fill")
+            .font(.title2.weight(.semibold))
+            .monospacedDigit()
+            .foregroundStyle(Color.white)
+            .padding(.horizontal, 20)
+            .padding(.vertical, 12)
+            .background(Capsule().fill(Color.black.opacity(0.7)))
+            .accessibilityHidden(true)
     }
 
-    // MARK: - Modes Tab
-    var modesTab: some View {
-        VStack(spacing: 20) {
-            // Mode grid
-            LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 16), count: 2), spacing: 16) {
-                ForEach(ScreenlightMode.allCases, id: \.self) { mode in
-                    modeButton(mode: mode)
-                }
-            }
-
-            // Mode-specific settings
-            if manager.currentMode == .gradient {
-                gradientSettings
-            }
-        }
-    }
-
-    func modeButton(mode: ScreenlightMode) -> some View {
-        Button(action: {
-            withAnimation {
-                manager.setMode(mode)
-            }
-        }) {
-            HStack(spacing: 12) {
-                Image(systemName: modeIcon(for: mode))
-                    .font(.system(size: 22))
-                Text(mode.rawValue)
-                    .font(.system(size: baseFontSize))
-                Spacer()
-                if manager.currentMode == mode {
-                    Image(systemName: "checkmark.circle.fill")
-                        .font(.system(size: 22))
-                }
-            }
-            .padding(16)
-            .background(
-                RoundedRectangle(cornerRadius: 12)
-                    .fill(manager.currentMode == mode ? Color.white.opacity(0.2) : Color.black.opacity(0.2))
-            )
-        }
-        .buttonStyle(.plain)
-    }
-
-    func modeIcon(for mode: ScreenlightMode) -> String {
-        switch mode {
-        case .normal: return "flashlight.on.fill"
-        case .sos: return "sos"
-        case .candle: return "flame"
-        case .disco: return "party.popper"
-        case .rainbow: return "rainbow"
-        case .gradient: return "paintbrush"
-        }
-    }
-
-    var gradientSettings: some View {
-        VStack(spacing: 16) {
-            HStack {
-                Text("Gradient Colors")
-                    .font(.system(size: baseFontSize, weight: .semibold))
-                Spacer()
-            }
-
-            HStack {
-                VStack(spacing: 8) {
-                    Text("Start")
-                        .font(.system(size: 16))
-                    ColorPicker("", selection: $manager.gradientColor1, supportsOpacity: false)
-                        .labelsHidden()
-                        .frame(width: 50, height: 50)
-                }
-
-                Spacer()
-
-                Image(systemName: "arrow.right")
-                    .font(.system(size: 24))
-
-                Spacer()
-
-                VStack(spacing: 8) {
-                    Text("End")
-                        .font(.system(size: 16))
-                    ColorPicker("", selection: $manager.gradientColor2, supportsOpacity: false)
-                        .labelsHidden()
-                        .frame(width: 50, height: 50)
-                }
-            }
-        }
-        .padding(16)
-        .background(
-            RoundedRectangle(cornerRadius: 12)
-                .fill(Color.black.opacity(0.2))
-        )
-    }
-
-    // MARK: - Settings Tab
-    var settingsTab: some View {
-        VStack(spacing: 20) {
-            // Timer section
-            VStack(alignment: .leading, spacing: 14) {
-                Text("Auto-Off Timer")
-                    .font(.system(size: baseFontSize, weight: .semibold))
-
-                HStack(spacing: 12) {
-                    ForEach([5, 10, 15, 30], id: \.self) { minutes in
-                        Button("\(minutes)m") {
-                            manager.startTimer(minutes: minutes)
-                        }
-                        .font(.system(size: 16))
-                        .buttonStyle(.bordered)
-                    }
-
-                    if manager.isTimerActive {
-                        Button("Stop") {
-                            manager.stopTimer()
-                        }
-                        .font(.system(size: 16))
-                        .buttonStyle(.borderedProminent)
-                        .tint(.red)
-                    }
-                }
-
-                if manager.isTimerActive {
-                    HStack {
-                        Image(systemName: "timer")
-                            .font(.system(size: baseFontSize))
-                        Text("Time remaining: \(manager.timerDisplay)")
-                            .font(.system(size: baseFontSize))
-                            .monospacedDigit()
-                    }
-                    .foregroundColor(.orange)
-                }
-            }
-            .padding(16)
-            .background(
-                RoundedRectangle(cornerRadius: 12)
-                    .fill(Color.black.opacity(0.2))
-            )
-
-            // Keyboard shortcuts info (Mac only)
-            #if os(macOS)
-            keyboardShortcutsInfo
-            #endif
-
-            // Gesture info (iOS only)
-            #if os(iOS)
-            gestureInfo
-            #endif
-        }
-    }
-
-    #if os(macOS)
-    var keyboardShortcutsInfo: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text("Keyboard Shortcuts")
-                .font(.system(size: baseFontSize, weight: .semibold))
-
-            VStack(alignment: .leading, spacing: 8) {
-                shortcutRow(key: "← →", action: "Change color")
-                shortcutRow(key: "↑ ↓", action: "Adjust brightness")
-                shortcutRow(key: "Space", action: "Start/Stop flashlight")
-                shortcutRow(key: "Esc", action: "Stop flashlight")
-            }
-        }
-        .padding(16)
-        .background(
-            RoundedRectangle(cornerRadius: 12)
-                .fill(Color.black.opacity(0.2))
-        )
-    }
-
-    func shortcutRow(key: String, action: String) -> some View {
-        HStack(spacing: 12) {
-            Text(key)
-                .font(.system(size: 16, weight: .medium, design: .monospaced))
-                .padding(.horizontal, 10)
-                .padding(.vertical, 6)
-                .background(
-                    RoundedRectangle(cornerRadius: 6)
-                        .fill(Color.white.opacity(0.1))
-                )
-            Text(action)
-                .font(.system(size: 16))
-                .foregroundColor(.secondary)
-        }
-    }
-    #endif
-
-    #if os(iOS)
-    var gestureInfo: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text("Gestures")
-                .font(.system(size: baseFontSize, weight: .semibold))
-
-            VStack(alignment: .leading, spacing: 10) {
-                gestureRow(icon: "hand.draw", action: "Swipe left/right to change color")
-                gestureRow(icon: "hand.draw", action: "Swipe up/down to adjust brightness")
-                gestureRow(icon: "hand.tap", action: "Tap in fullscreen to show/hide controls")
-            }
-        }
-        .padding(16)
-        .background(
-            RoundedRectangle(cornerRadius: 12)
-                .fill(Color.black.opacity(0.2))
-        )
-    }
-
-    func gestureRow(icon: String, action: String) -> some View {
-        HStack(spacing: 12) {
-            Image(systemName: icon)
-                .font(.system(size: 20))
-                .frame(width: 30)
-            Text(action)
-                .font(.system(size: 16))
-                .foregroundColor(.secondary)
-        }
-    }
-    #endif
-
-    // MARK: - Bottom Controls
-    var bottomControls: some View {
-        Button(action: {
-            withAnimation(.easeInOut(duration: 0.3)) {
-                #if os(macOS)
-                toggleFullScreen()
+    private var hint: some View {
+        HStack(alignment: .top, spacing: 12) {
+            VStack(alignment: .leading, spacing: 6) {
+                #if os(iOS)
+                Label("Swipe up or down: brightness", systemImage: "arrow.up.arrow.down")
+                Label("Swipe sideways: color", systemImage: "arrow.left.arrow.right")
+                Label("Tap: show or hide controls", systemImage: "hand.tap")
                 #else
-                manager.isFullScreen.toggle()
-                if manager.isFullScreen {
-                    manager.showControls = true
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
-                        if manager.isFullScreen {
-                            withAnimation {
-                                manager.showControls = false
-                            }
-                        }
-                    }
-                } else {
-                    manager.showControls = true
-                }
+                Label { Text(verbatim: "↑ ↓  ") + Text("Brightness") } icon: { Image(systemName: "arrow.up.arrow.down") }
+                Label { Text(verbatim: "← →  ") + Text("Color") } icon: { Image(systemName: "arrow.left.arrow.right") }
+                Label("Space: light on or off", systemImage: "power")
                 #endif
             }
-        }) {
-            HStack(spacing: 12) {
-                Image(systemName: manager.isFullScreen ? "arrow.down.right.and.arrow.up.left" : "flashlight.on.fill")
-                    .font(.system(size: 22))
-                Text(manager.isFullScreen ? "Stop Screenlight" : "Start Screenlight")
-                    .font(.system(size: 20, weight: .semibold))
+            .font(.footnote.weight(.medium))
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .accessibilityElement(children: .combine)
+
+            Button {
+                withAnimation { hintDismissed = true }
+            } label: {
+                Image(systemName: "xmark")
+                    .font(.footnote.weight(.bold))
+                    .frame(width: Metrics.touchTarget, height: Metrics.touchTarget)
+                    .contentShape(Rectangle())
             }
-            .foregroundColor(.white)
-            .padding(.vertical, 16)
-            .padding(.horizontal, 24)
-            .frame(maxWidth: .infinity)
-            .background(
-                RoundedRectangle(cornerRadius: 15)
-                    .fill(Color.black.opacity(0.5))
-            )
+            .buttonStyle(.plain)
+            .accessibilityLabel(Text("Close tips"))
         }
-        .buttonStyle(.plain)
-        .padding()
+        .foregroundStyle(Color.white)
+        .padding(.leading, 16)
+        .padding(.vertical, 6)
+        .background(
+            RoundedRectangle(cornerRadius: 20, style: .continuous)
+                .fill(Color(white: 0.09).opacity(0.9))
+        )
+        .frame(maxWidth: Metrics.panelMaxWidth)
+        .environment(\.colorScheme, .dark)
+        .dynamicTypeSize(...DynamicTypeSize.accessibility1)
     }
 }
 
 #Preview {
-    ContentView()
+    ContentView(store: LightStore())
 }
