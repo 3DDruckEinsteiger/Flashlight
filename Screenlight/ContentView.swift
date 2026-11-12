@@ -15,6 +15,7 @@ struct ContentView: View {
     @AppStorage("hintDismissed") private var hintDismissed = false
     #if os(macOS)
     @FocusState private var isFocused: Bool
+    @State private var enteredFullScreen = false
     #endif
 
     private var isCompactHeight: Bool { verticalSizeClass == .compact }
@@ -45,7 +46,7 @@ struct ContentView: View {
                 }
                 Spacer(minLength: 0)
                 if panelVisible {
-                    ControlPanel(store: store) { setPanelVisible(false) }
+                    ControlPanel(store: store) { setPanelVisible(false, fillDisplay: true) }
                         .frame(maxWidth: Metrics.panelMaxWidth)
                         .transition(.move(edge: .bottom).combined(with: .opacity))
                 }
@@ -106,16 +107,20 @@ struct ContentView: View {
         DeviceControl.setLightActive(store.isOn && scenePhase != .background)
     }
 
-    private func setPanelVisible(_ visible: Bool) {
+    /// - Parameter fillDisplay: On the Mac, "Light only" also switches the window to full screen.
+    ///   A plain click on the light only shows or hides the controls.
+    private func setPanelVisible(_ visible: Bool, fillDisplay: Bool = false) {
         withAnimation(.easeInOut(duration: 0.25)) {
             panelVisible = visible
         }
         #if os(macOS)
-        // "Light only" on the Mac also fills the whole display.
-        if !visible {
+        if !visible, fillDisplay, !DeviceControl.isFullScreen {
             DeviceControl.setFullScreen(true)
-        } else if DeviceControl.isFullScreen {
+            enteredFullScreen = true
+        } else if visible, enteredFullScreen {
+            // Only leave full screen if this app entered it, not if the user did.
             DeviceControl.setFullScreen(false)
+            enteredFullScreen = false
         }
         isFocused = true
         #endif

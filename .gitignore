@@ -19,3 +19,9 @@ Pods/
 .DS_Store
 .AppleDouble
 .LSOverride
+
+# Große Noto-Schriften für Store-Bilder (werden mit Store/tools/schriften_laden.py geholt)
+Store/medien/schrift/Noto*.ttf
+# Erzeugte Store-Medien und Rohaufnahmen
+Store/medien/roh/
+Store/medien/fertig/

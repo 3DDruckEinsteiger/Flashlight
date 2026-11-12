@@ -46,12 +46,19 @@ FONTS = {
 }
 
 
+# Zeilenhöhe für Schriften mit hohen Ober- und Unterlängen.
+TALL = {"ur": 1.9, "ar": 1.35, "th": 1.35, "hi": 1.3, "mr": 1.3, "bn": 1.3, "gu": 1.3, "pa": 1.3,
+        "kn": 1.3, "ml": 1.3, "or": 1.3, "ta": 1.3, "te": 1.3}
+
+
 def render(shot: pathlib.Path, out: pathlib.Path, text: str, device: dict, glow: str, language: str) -> None:
     width, height = device["size"]
     query = urllib.parse.urlencode({
         "w": width, "h": height, "radius": device["radius"], "glow": glow, "text": text,
         "lang": language, "dir": "rtl" if language in RTL else "ltr",
-        "font": FONTS.get(language, ""), "shot": shot.resolve().as_uri()})
+        "font": FONTS.get(language, ""),
+        "fontfile": FONTS[language].replace(" ", "") + ".ttf" if language in FONTS else "",
+        "lh": TALL.get(language, 1.12), "shot": shot.resolve().as_uri()})
     out.parent.mkdir(parents=True, exist_ok=True)
     raw = out.with_suffix(".raw.png")
     subprocess.run([

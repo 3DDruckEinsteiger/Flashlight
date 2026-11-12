@@ -54,14 +54,27 @@
   head.style.fontFamily = (extra ? `"${extra}", ` : "") + `"Inter", sans-serif`;
   head.textContent = q.get("text") || "";
   head.style.maxWidth = (W * 0.86) + "px";
-  let size = bandH * (portrait ? 0.30 : 0.36);
-  // At most two lines, and never taller than the band.
-  const fits = () => head.scrollHeight <= Math.min(bandH * 0.80, size * 1.12 * 2.2) && head.scrollWidth <= W * 0.86 + 1;
-  head.style.fontSize = size + "px";
-  while (!fits() && size > 20) { size -= 2; head.style.fontSize = size + "px"; }
+  // Scripts with tall marks (Nastaliq, Indic, Thai) need more line height.
+  const lineHeight = +q.get("lh") || 1.12;
+  head.style.lineHeight = lineHeight;
+  if (extra) { head.style.letterSpacing = "0"; head.style.fontWeight = 700; }
+
+  async function layout() {
+    if (extra && q.get("fontfile")) {
+      const face = new FontFace(extra, `url("../medien/schrift/${q.get("fontfile")}")`, { weight: "100 900" });
+      document.fonts.add(await face.load());
+    }
+    await document.fonts.load(`750 40px "Inter"`);
+    let size = bandH * (portrait ? 0.30 : 0.36);
+    // At most two lines, and never taller than the band.
+    const fits = () => head.scrollHeight <= Math.min(bandH * 0.80, size * lineHeight * 2.2) && head.scrollWidth <= W * 0.86 + 1;
+    head.style.fontSize = size + "px";
+    while (!fits() && size > 20) { size -= 2; head.style.fontSize = size + "px"; }
+  }
 
   const shot = document.getElementById("shot");
-  shot.onload = () => {
+  shot.onload = async () => {
+    await layout();
     const availH = H - bandH - bottom, availW = W * 0.90;
     const ratio = shot.naturalWidth / shot.naturalHeight;
     let sh = availH, sw = sh * ratio;

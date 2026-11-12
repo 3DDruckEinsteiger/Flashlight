@@ -65,5 +65,12 @@
     "keywords": "lamba,ışık,gece lambası,okuma ışığı,softbox,selfie,renkli,sos,mum,aydınlatma,ambiyans,ekran,ortam",
     "description": "Screenlight Mobile, iPhone, iPad veya Mac’inizin ekranını yumuşak ve dengeli bir ışığa dönüştürür – tam da ihtiyacınız olan renkte ve parlaklıkta.\n\nTelefonun arkasındaki LED serttir ve tek bir ayarı vardır. Ekranınız ise gözü yormaz, kısılabilir ve her renkte ışık verebilir. Uygulamayı açın, ışık yansın.\n\nTEK EL İÇİN TASARLANDI\n• Ekranın altında büyük bir açma/kapama düğmesi ve geniş bir parlaklık sürgüsü\n• Parlaklığı değiştirmek için ışığın üzerinde yukarı veya aşağı, rengi değiştirmek için yana kaydırın\n• Denetimleri gizlemek için ışığa dokunun – böylece tüm ekran ışık verir\n\nHER RENK, HER BEYAZ\n• On hazır renk\n• Sıcak mum ışığından soğuk gün ışığına beyaz tonu\n• İstediğiniz rengi seçin ve favorilerinizi kaydedin\n\nMODLAR\n• Sabit ışık\n• Mors alfabesiyle SOS imdat sinyali\n• Hafifçe titreşen mum\n• Disko, Gökkuşağı ve seçtiğiniz iki renk arasında Geçiş\n\nKULLANIŞLI AYRINTILAR\n• 1 ile 60 dakika arasında otomatik kapanma sayacı – gece lambası olarak ideal\n• Işık açıkken ekran kapanmaz\n• iPhone ve iPad’de ekran tam parlaklığa geçer, sonrasında kendi ayarınıza döner\n• Işık kapalıyken animasyonlar duraklar, böylece pil korunur\n• VoiceOver, büyük metin ve “Hareketi Azalt” ayarıyla çalışır\n• Mac’te: klavye kestirmeleri ve tam ekran\n\nŞUNLAR İÇİN İDEAL\n• Kimseyi uyandırmadan yatakta kitap okumak\n• Çocuklar için gece lambası\n• Fotoğraf, selfie ve görüntülü aramalar için yumuşak dolgu ışığı\n• Yıldızları izlerken gece görüşünüzü koruyan kırmızı ışık\n• Anahtar deliğini, çadırın fermuarını veya sigorta kutusunu bulmak\n\nGİZLİLİK TASARIMIN PARÇASI\nHesap yok, reklam yok, izleme yok. Screenlight Mobile hiçbir veri toplamaz ve tamamen çevrimdışı çalışır.",
     "whatsnew": "Baştan sona yeniden tasarlandı.\n\n• Yeni görünüm: ışık ekranı doldurur, tüm denetimler altta, başparmağınızın ulaşabileceği yerdedir\n• Açıp kapatmak için tek bir büyük düğme ve geniş bir parlaklık sürgüsü\n• Işığın üzerinde kaydırın: parlaklık için yukarı veya aşağı, renk için yana\n• Sıcaktan soğuğa yeni beyaz tonu sürgüsü\n• Favori renkleri tek dokunuşla kaydedin\n• Işık açıkken ekran artık kapanmıyor; iPhone ve iPad’de ayrıca tam parlaklığa geçiyor\n• Sayaç düzeltildi: ışık artık sorunsuz kapanıyor ve kendi parlaklık ayarınızla geri geliyor\n• Daha sakin Disko modu, daha yumuşak Mum, daha az pil tüketimi\n• VoiceOver, büyük metin ve “Hareketi Azalt” için daha iyi destek\n• Artık çok daha fazla dilde"
-  }
+  },
+  "shots": [
+    "Ekranınızdan yumuşak ışık",
+    "Dilediğiniz her renk",
+    "Mum, SOS, gökkuşağı ve fazlası",
+    "Kendi kendine kapanır",
+    "Kaydırarak parlaklık ve renk seçin"
+  ]
 }
