@@ -71,3 +71,20 @@ Muttersprachlern geprüft.
 - Keine Werkzeuge oder Bibliotheken mit Telemetrie, keine Werbung, keine Datenerhebung in der App.
 - Nur eigene oder nachweislich frei lizenzierte Schriften, Symbole, Töne und Bilder; Herkunft in `Store/QUELLEN.md` eintragen.
 - Nicht auf `main` arbeiten, nichts force-pushen.
+
+## Einreichen (Stand 12.11.2026)
+
+Xcode ist auf diesem Mac nicht mit einem Entwicklerkonto angemeldet, und der API-Schlüssel darf keine
+Cloud-Signierung. Deshalb wird von Hand signiert:
+
+1. `Store/tools/asc_profile.py` legt die Profile „Screenlight Mobile iOS App Store“ und „… Mac App Store“
+   mit dem lokalen Zertifikat „Apple Distribution“ an bzw. installiert sie.
+2. `xcodebuild archive` (iOS: `generic/platform=iOS`, Mac: `generic/platform=macOS`), dann `-exportArchive`
+   mit `signingStyle manual`, dem passenden Profil, `destination upload` und den drei
+   `-authenticationKey…`-Parametern; beim Mac zusätzlich `installerSigningCertificate`
+   „3rd Party Mac Developer Installer“.
+3. `asc_store.py version|texts|media|build`, dann `asc_pruefen.py` (muss „0 Probleme“ melden), dann `asc_store.py submit`.
+
+Apple verlangt beim Einreichen einen Prüfkontakt (Name, E-Mail, Telefon) und vollständige Altersangaben;
+fehlt etwas, nennt die Antwort auf `reviewSubmissionItems` die Felder unter `meta.associatedErrors`.
+Build-Nummern müssen über beide Plattformen hinweg steigen (zuletzt hochgeladen: Build 5).
