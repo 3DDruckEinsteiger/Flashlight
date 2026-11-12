@@ -221,7 +221,14 @@ def cmd_media(platform: str, version: str, folder: str) -> None:
         if not loc:
             failed.append(f"{locale_dir.name}: no such localization on this version")
             continue
-        for type_dir in sorted(p for p in locale_dir.iterdir() if p.is_dir()):
+        wanted = [p for p in sorted(locale_dir.iterdir()) if p.is_dir()
+                  and ("DESKTOP" in p.name) == (platform == "MAC_OS")]
+        # Screenshot sets copied over from the previous version (old interface) must go.
+        keep = {p.name for p in wanted if not p.name.startswith("preview_")}
+        for old_set in paged(f"/v1/appStoreVersionLocalizations/{loc['id']}/appScreenshotSets?limit=50"):
+            if keep and old_set["attributes"]["screenshotDisplayType"] not in keep:
+                call("DELETE", f"/v1/appScreenshotSets/{old_set['id']}")
+        for type_dir in wanted:
             is_preview = type_dir.name.startswith("preview_")
             kind = type_dir.name.replace("preview_", "")
             set_type, item_type = ("appPreviewSets", "appPreviews") if is_preview else ("appScreenshotSets", "appScreenshots")
