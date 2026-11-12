@@ -45,17 +45,13 @@ struct ContentView: View {
                     .allowsHitTesting(false)
             }
 
-            VStack(spacing: 12) {
+            // The tips are shown only where they fit above the complete panel;
+            // on small screens the controls come first.
+            ViewThatFits(in: .vertical) {
                 if panelVisible, store.isOn, !hintDismissed, !isCompactHeight {
-                    hint
-                        .transition(.opacity)
+                    overlay(withHint: true)
                 }
-                Spacer(minLength: 0)
-                if panelVisible {
-                    ControlPanel(store: store) { setPanelVisible(false, fillDisplay: true) }
-                        .frame(maxWidth: Metrics.panelMaxWidth)
-                        .transition(reduceMotion ? .opacity : .move(edge: .bottom).combined(with: .opacity))
-                }
+                overlay(withHint: false)
             }
             .frame(maxWidth: .infinity, alignment: isCompactHeight ? .trailing : .center)
             .padding(.horizontal, 12)
@@ -97,6 +93,21 @@ struct ContentView: View {
             return .handled
         }
         #endif
+    }
+
+    private func overlay(withHint: Bool) -> some View {
+        VStack(spacing: 12) {
+            if withHint {
+                hint
+                    .transition(.opacity)
+            }
+            Spacer(minLength: 0)
+            if panelVisible {
+                ControlPanel(store: store) { setPanelVisible(false, fillDisplay: true) }
+                    .frame(maxWidth: Metrics.panelMaxWidth)
+                    .transition(reduceMotion ? .opacity : .move(edge: .bottom).combined(with: .opacity))
+            }
+        }
     }
 
     /// The status bar follows the system colour scheme, so the scheme follows

@@ -52,7 +52,35 @@
   const head = document.getElementById("head");
   const extra = q.get("font");
   head.style.fontFamily = (extra ? `"${extra}", ` : "") + `"Inter", sans-serif`;
-  head.textContent = q.get("text") || "";
+  // Line breaks must not fall inside a word. Scripts without spaces need help:
+  // Korean breaks only at spaces, Thai only between the space-separated phrases,
+  // Chinese and Japanese after punctuation and otherwise at phrase boundaries.
+  const text = q.get("text") || "";
+  const lang = q.get("lang") || "en";
+  const nowrapParts = (parts) => {
+    for (const part of parts) {
+      const span = document.createElement("span");
+      span.style.whiteSpace = "nowrap";
+      span.textContent = part;
+      head.append(span, document.createElement("wbr"));
+    }
+  };
+  if (text.includes("|")) {
+    // "|" in a headline marks the only place where it may wrap.
+    nowrapParts(text.split("|"));
+  } else if (lang === "ko") {
+    head.style.wordBreak = "keep-all";
+    head.textContent = text;
+  } else if (lang === "th" && text.includes(" ")) {
+    nowrapParts(text.split(/(?<= )/));
+  } else if (lang === "ja" || lang.startsWith("zh")) {
+    head.style.wordBreak = "auto-phrase";
+    head.style.lineBreak = "strict";
+    const parts = text.split(/(?<=[，、,])/);
+    if (parts.length > 1) { nowrapParts(parts); } else { head.textContent = text; }
+  } else {
+    head.textContent = text;
+  }
   head.style.maxWidth = (W * 0.86) + "px";
   // Scripts with tall marks (Nastaliq, Indic, Thai) need more line height.
   const lineHeight = +q.get("lh") || 1.12;

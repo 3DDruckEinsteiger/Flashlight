@@ -4,6 +4,7 @@ import SwiftUI
 
 struct ColorSection: View {
     @ObservedObject var store: LightStore
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     private let columns = Array(repeating: GridItem(.flexible(), spacing: 8), count: 5)
 
@@ -48,7 +49,10 @@ struct ColorSection: View {
                 .accessibilityElement(children: .contain)
             }
 
-            HStack(spacing: 8) {
+            // Side by side normally, stacked with very large text.
+            let row = dynamicTypeSize.isAccessibilitySize
+                ? AnyLayout(VStackLayout(spacing: 8)) : AnyLayout(HStackLayout(spacing: 8))
+            row {
                 ColorPicker(selection: customColor, supportsOpacity: false) {
                     Label("Custom", systemImage: "eyedropper")
                         .font(.subheadline.weight(.semibold))
@@ -124,8 +128,12 @@ struct ColorSection: View {
 
 struct ModeSection: View {
     @ObservedObject var store: LightStore
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
-    private let columns = Array(repeating: GridItem(.flexible(), spacing: 8), count: 3)
+    /// Fewer columns with very large text, so that no name is cut off.
+    private var columns: [GridItem] {
+        Array(repeating: GridItem(.flexible(), spacing: 8), count: dynamicTypeSize.isAccessibilitySize ? 2 : 3)
+    }
 
     var body: some View {
         VStack(spacing: 12) {
@@ -197,13 +205,18 @@ struct ModeSection: View {
 
 struct TimerSection: View {
     @ObservedObject var store: LightStore
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
-    private let columns = Array(repeating: GridItem(.flexible(), spacing: 8), count: 5)
+    private var columns: [GridItem] {
+        Array(repeating: GridItem(.flexible(), spacing: 8), count: dynamicTypeSize.isAccessibilitySize ? 3 : 5)
+    }
 
     var body: some View {
         VStack(spacing: 12) {
             if let end = store.timerEnd {
-                HStack(spacing: 12) {
+                let header = dynamicTypeSize.isAccessibilitySize
+                    ? AnyLayout(VStackLayout(alignment: .leading, spacing: 8)) : AnyLayout(HStackLayout(spacing: 12))
+                header {
                     VStack(alignment: .leading, spacing: 2) {
                         Text("Light turns off in")
                             .font(.footnote)
@@ -212,7 +225,7 @@ struct TimerSection: View {
                             .font(.system(.title, design: .rounded).weight(.semibold))
                     }
                     .accessibilityElement(children: .combine)
-                    Spacer(minLength: 8)
+                    .frame(maxWidth: .infinity, alignment: .leading)
                     Button {
                         store.cancelTimer()
                         Haptics.selection()

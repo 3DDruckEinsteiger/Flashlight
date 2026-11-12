@@ -30,14 +30,10 @@ struct ControlPanel: View {
     let onLightOnly: () -> Void
 
     @AppStorage("selectedTab") private var selectedTab: PanelTab = .color
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     var body: some View {
-        // Falls back to scrolling when the panel does not fit
-        // (landscape phones, very large text).
-        ViewThatFits(in: .vertical) {
-            content
-            ScrollView(showsIndicators: false) { content }
-        }
+        content
         .padding(16)
         .background(
             RoundedRectangle(cornerRadius: Metrics.panelCornerRadius, style: .continuous)
@@ -52,7 +48,7 @@ struct ControlPanel: View {
         .foregroundStyle(Color.white)
         .tint(.white)
         .environment(\.colorScheme, .dark)
-        .dynamicTypeSize(...DynamicTypeSize.accessibility2)
+        .dynamicTypeSize(...DynamicTypeSize.accessibility1)
     }
 
     private var content: some View {
@@ -61,18 +57,26 @@ struct ControlPanel: View {
                 undoBar
             }
             tabs
-            Group {
-                switch selectedTab {
-                case .color: ColorSection(store: store)
-                case .mode: ModeSection(store: store)
-                case .timer: TimerSection(store: store)
-                }
+            // Only the middle part scrolls when space is tight (small phones, landscape,
+            // very large text). Brightness and power always stay on screen.
+            ViewThatFits(in: .vertical) {
+                section
+                ScrollView(showsIndicators: false) { section }
             }
             brightness
             actions
         }
         .animation(.easeInOut(duration: 0.2), value: store.removedFavorite?.favorite.id)
         .animation(.easeInOut(duration: 0.2), value: store.mode)
+    }
+
+    @ViewBuilder
+    private var section: some View {
+        switch selectedTab {
+        case .color: ColorSection(store: store)
+        case .mode: ModeSection(store: store)
+        case .timer: TimerSection(store: store)
+        }
     }
 
     // MARK: Tabs
@@ -84,7 +88,10 @@ struct ControlPanel: View {
                     selectedTab = tab
                     Haptics.selection()
                 } label: {
-                    HStack(spacing: 6) {
+                    // Very large text: icon above the word, so the word keeps its width.
+                    let layout = dynamicTypeSize.isAccessibilitySize
+                        ? AnyLayout(VStackLayout(spacing: 2)) : AnyLayout(HStackLayout(spacing: 6))
+                    layout {
                         Image(systemName: tab.symbol)
                         if tab == .timer, let end = store.timerEnd {
                             Countdown(end: end)
@@ -92,6 +99,7 @@ struct ControlPanel: View {
                             Text(tab.title)
                         }
                     }
+                    .padding(.vertical, dynamicTypeSize.isAccessibilitySize ? 6 : 0)
                 }
                 .buttonStyle(ChipStyle(isSelected: selectedTab == tab))
                 .accessibilityLabel(Text(tab.title))
@@ -132,19 +140,7 @@ struct ControlPanel: View {
             Button {
                 store.togglePower()
             } label: {
-                Label(store.isOn ? "Turn off" : "Turn on", systemImage: "power")
-                    .font(.headline)
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.7)
-                    .foregroundStyle(store.isOn ? Color.black : Color.white)
-                    .frame(maxWidth: .infinity, minHeight: Metrics.controlHeight + 4)
-                    .background(
-                        Capsule().fill(store.isOn ? Color.white : Color.white.opacity(0.18))
-                    )
-                    .overlay(
-                        Capsule().strokeBorder(Color.white.opacity(store.isOn ? 0 : 0.6), lineWidth: 1.5)
-                    )
-                    .contentShape(Capsule())
+                powerLabel
             }
             .buttonStyle(.plain)
             .accessibilityLabel(Text("Light"))
@@ -170,6 +166,22 @@ struct ControlPanel: View {
             .accessibilityHint(Text("Hides the controls. Tap the light to show them again."))
             .accessibilityIdentifier("lightOnly")
         }
+    }
+
+    private var powerLabel: some View {
+        let isOn = store.isOn
+        let fill: Color = isOn ? .white : .white.opacity(0.18)
+        let border: Color = .white.opacity(isOn ? 0 : 0.6)
+        return Label(isOn ? "Turn off" : "Turn on", systemImage: "power")
+            .font(.headline)
+            .lineLimit(1)
+            .minimumScaleFactor(0.6)
+            .foregroundStyle(isOn ? Color.black : Color.white)
+            .padding(.horizontal, 16)
+            .frame(maxWidth: .infinity, minHeight: Metrics.controlHeight + 4)
+            .background(Capsule().fill(fill))
+            .overlay(Capsule().strokeBorder(border, lineWidth: 1.5))
+            .contentShape(Capsule())
     }
 
     // MARK: Undo

@@ -1,5 +1,7 @@
 import XCTest
 
+#if os(iOS)
+
 /// Drives the real app in the simulator: every control is tapped and its effect checked.
 final class ScreenlightUITests: XCTestCase {
     private var app: XCUIApplication!
@@ -300,41 +302,30 @@ final class ScreenlightUITests: XCTestCase {
     func testStorePreviewTour() throws {
         try XCTSkipUnless(ProcessInfo.processInfo.environment["STORE_DEMO"] == "1", "only for recording the preview")
         launch(extra: ["-colorRed", "1", "-colorGreen", "0.82", "-colorBlue", "0.6"])
-        pause(1.5)
-        for swatch in ["#FF0000", "#0D66FF", "#B34DFF", "#26E640"] {
+        pause(1.2)
+        for swatch in ["#FF0000", "#0D66FF", "#B34DFF"] {
             element("swatch.\(swatch)").tap()
-            pause(0.7)
+            pause(0.3)
         }
-        slide("whiteTone", from: 0.5, to: 0.08)
-        slide("whiteTone", from: 0.08, to: 0.92)
-        pause(0.4)
-        element("swatch.#FFD199").tap()
+        slide("whiteTone", from: 0.5, to: 0.9)
+        slide("whiteTone", from: 0.9, to: 0.1)
         slide("brightness", from: 0.97, to: 0.35)
         slide("brightness", from: 0.35, to: 0.97)
-        pause(0.4)
         element("tab.mode").tap()
-        pause(0.6)
         element("mode.Candle").tap()
-        pause(2.6)
-        element("mode.Rainbow").tap()
-        pause(2.6)
-        element("mode.Normal").tap()
-        element("tab.timer").tap()
-        pause(0.6)
-        element("timer.15").tap()
-        pause(1.8)
-        element("lightOnly").tap()
-        pause(1.0)
-        drag(fromX: 0.8, y: 0.5, toX: 0.2, y: 0.5)
-        pause(0.8)
-        drag(fromX: 0.8, y: 0.5, toX: 0.2, y: 0.5)
-        pause(0.8)
-        drag(fromX: 0.5, y: 0.3, toX: 0.5, y: 0.6)
-        pause(0.6)
-        drag(fromX: 0.5, y: 0.6, toX: 0.5, y: 0.2)
-        pause(1.0)
-        element("surface").tap()
         pause(2.0)
+        element("mode.Rainbow").tap()
+        pause(2.0)
+        element("tab.timer").tap()
+        element("timer.15").tap()
+        pause(1.0)
+        element("lightOnly").tap()
+        pause(0.6)
+        drag(fromX: 0.5, y: 0.3, toX: 0.5, y: 0.6)
+        drag(fromX: 0.5, y: 0.6, toX: 0.5, y: 0.2)
+        pause(0.5)
+        element("surface").tap()
+        pause(2.5)
     }
 
     private func pause(_ seconds: TimeInterval) {
@@ -368,3 +359,100 @@ final class ScreenlightUITests: XCTestCase {
         return target.isHittable
     }
 }
+#endif
+
+#if os(macOS)
+/// The Mac version: mouse, keyboard and menu. These tests take over the pointer while they run.
+final class ScreenlightMacUITests: XCTestCase {
+    private var app: XCUIApplication!
+
+    override func setUp() {
+        continueAfterFailure = false
+        app = XCUIApplication()
+        app.launchArguments = ["-AppleLanguages", "(en)", "-AppleLocale", "en_US", "-hintDismissed", "YES", "-uiTestReset", "YES"]
+        app.launch()
+        XCTAssertTrue(element("power").waitForExistence(timeout: 20))
+    }
+
+    override func tearDown() {
+        app.terminate()
+    }
+
+    private func element(_ identifier: String) -> XCUIElement {
+        app.descendants(matching: .any).matching(identifier: identifier).firstMatch
+    }
+
+    private func value(_ identifier: String) -> String {
+        element(identifier).value as? String ?? ""
+    }
+
+    func testMouseOperatesEveryPartOfThePanel() {
+        XCTAssertEqual(value("power"), "On")
+        element("swatch.#FF0000").click()
+        XCTAssertTrue(element("swatch.#FF0000").isSelected)
+        element("tab.mode").click()
+        for mode in ["SOS", "Candle", "Disco", "Rainbow", "Gradient", "Normal"] {
+            element("mode.\(mode)").click()
+            XCTAssertTrue(element("mode.\(mode)").isSelected, mode)
+        }
+        element("tab.timer").click()
+        element("timer.5").click()
+        XCTAssertTrue(element("timer.stop").waitForExistence(timeout: 3))
+        element("timer.stop").click()
+        XCTAssertTrue(element("timer.stop").waitForNonExistence(timeout: 3))
+        element("power").click()
+        XCTAssertEqual(value("power"), "Off")
+        element("power").click()
+        XCTAssertEqual(value("power"), "On")
+    }
+
+    func testKeyboardChangesColorBrightnessAndPower() {
+        element("surface").coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.08)).click()
+        XCTAssertTrue(element("power").waitForNonExistence(timeout: 3), "a click on the light hides the controls")
+        app.typeKey(.escape, modifierFlags: [])
+        XCTAssertTrue(element("power").waitForExistence(timeout: 3), "Escape brings the controls back")
+
+        app.typeKey(.rightArrow, modifierFlags: [])
+        XCTAssertTrue(element("swatch.#FFD199").isSelected, "right arrow selects the next colour")
+        app.typeKey(.leftArrow, modifierFlags: [])
+        XCTAssertTrue(element("swatch.#FFFFFF").isSelected)
+
+        XCTAssertEqual(value("brightness"), "100%")
+        app.typeKey(.downArrow, modifierFlags: [])
+        app.typeKey(.downArrow, modifierFlags: [])
+        XCTAssertEqual(value("brightness"), "80%")
+        app.typeKey(.upArrow, modifierFlags: [])
+        XCTAssertEqual(value("brightness"), "90%")
+
+        app.typeKey(" ", modifierFlags: [])
+        XCTAssertEqual(value("power"), "Off")
+        app.typeKey(" ", modifierFlags: [])
+        XCTAssertEqual(value("power"), "On")
+    }
+
+    func testMenuCommands() {
+        app.typeKey("l", modifierFlags: .command)
+        XCTAssertEqual(value("power"), "Off")
+        app.typeKey("l", modifierFlags: .command)
+        XCTAssertEqual(value("power"), "On")
+        app.typeKey(.downArrow, modifierFlags: .command)
+        XCTAssertEqual(value("brightness"), "90%")
+        app.typeKey(.rightArrow, modifierFlags: .command)
+        XCTAssertTrue(element("swatch.#FFD199").isSelected)
+        XCTAssertTrue(app.menuBars.menuBarItems["Light"].exists)
+    }
+
+    func testLightOnlyEntersAndLeavesFullScreen() {
+        let window = app.windows.firstMatch
+        let before = window.frame
+        element("lightOnly").click()
+        XCTAssertTrue(element("power").waitForNonExistence(timeout: 5))
+        sleep(2)
+        XCTAssertGreaterThan(window.frame.width, before.width, "the window fills the display")
+        app.typeKey(.escape, modifierFlags: [])
+        XCTAssertTrue(element("power").waitForExistence(timeout: 5))
+        sleep(2)
+        XCTAssertEqual(window.frame.width, before.width, accuracy: 2, "the window returns to its size")
+    }
+}
+#endif

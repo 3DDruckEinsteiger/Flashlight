@@ -8,12 +8,14 @@ Transparenz als RGB-PNG gespeichert (Apple lehnt Bilder mit Alphakanal ab).
 
 Aufruf (vom Projektordner aus):
   python3 Store/tools/store_bilder.py <roh-ordner> <ziel-ordner> [sprache ...]
+  Nur ein Gerät: Umgebungsvariable STORE_GERAET=iphone|ipad|mac setzen.
 
 Roh-Ordner:   <roh>/<sprache>/<geraet>/<NN>.png   (echte Aufnahmen, z. B. de/iphone/01.png)
-Ziel-Ordner:  <ziel>/<asc-locale>/<APP_IPHONE_67|APP_IPAD_PRO_3GEN_129|APP_DESKTOP>/<NN>.png
+Ziel-Ordner:  <ziel>/<asc-locale>/<APP_IPHONE_67|APP_IPAD_PRO_3GEN_129|APP_DESKTOP>/<NN>.jpg
 Überschriften: Store/lokalisierung/<sprache>.json unter "shots" (Liste, eine je Motiv).
 """
 import json
+import os
 import pathlib
 import subprocess
 import sys
@@ -66,13 +68,10 @@ def render(shot: pathlib.Path, out: pathlib.Path, text: str, device: dict, glow:
         f"--window-size={width},{height}", "--allow-file-access-from-files", "--virtual-time-budget=5000",
         "--no-first-run", "--disable-extensions", f"--screenshot={raw}", f"{TEMPLATE.as_uri()}?{query}",
     ], check=True, timeout=180, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-    # RGB ohne Alphakanal; sips ist Bestandteil von macOS.
-    subprocess.run(["sips", "-s", "format", "jpeg", "-s", "formatOptions", "100", str(raw), "--out",
-                    str(raw.with_suffix(".jpg"))], check=True, stdout=subprocess.DEVNULL)
-    subprocess.run(["sips", "-s", "format", "png", str(raw.with_suffix(".jpg")), "--out", str(out)],
+    # JPEG: kein Alphakanal (Apple lehnt Transparenz ab) und ein Bruchteil der PNG-Größe.
+    subprocess.run(["sips", "-s", "format", "jpeg", "-s", "formatOptions", "92", str(raw), "--out", str(out)],
                    check=True, stdout=subprocess.DEVNULL)
     raw.unlink()
-    raw.with_suffix(".jpg").unlink()
 
 
 def main() -> int:
@@ -86,11 +85,15 @@ def main() -> int:
     for language in wanted:
         source = LOC / f"{language}.json"
         base = language if source.exists() else "en"
-        heads = json.loads((LOC / f"{base}.json").read_text(encoding="utf-8")).get("shots") or english
+        data = json.loads((LOC / f"{base}.json").read_text(encoding="utf-8"))
         for name, device in DEVICES.items():
+            # Der Mac hat eigene Überschriften, wo die Bedienung abweicht (Tasten statt Wischen).
+            heads = (data.get("shots_mac") if name == "mac" else None) or data.get("shots") or english
+            if os.environ.get("STORE_GERAET") not in (None, "", name):
+                continue
             for shot in sorted((raw_root / language / name).glob("[0-9][0-9].png")):
                 index = int(shot.stem) - 1
-                out = out_root / LOCALES[language] / device["set"] / shot.name
+                out = out_root / LOCALES[language] / device["set"] / (shot.stem + ".jpg")
                 render(shot, out, heads[index], device, GLOW[index % len(GLOW)], language)
                 count += 1
         print(language, "fertig", flush=True)
