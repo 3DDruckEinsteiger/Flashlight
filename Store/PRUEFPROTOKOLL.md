@@ -29,6 +29,32 @@ Stand: 12.11.2026. Geprüft wurde ausschließlich im Simulator (Vorgabe: kein ec
 | Video | 886 × 1920, H.264 High Level 4.0, 30 Bilder/s, 25,3 s, stumme Stereo-Tonspur; 26 Einzelbilder angesehen, nur App-Inhalt |
 | Blitzfrequenz | SOS höchstens 3 Wechsel pro Sekunde, Kerze und Disco darunter (vom Gegenprüfer nachgerechnet) |
 
+## Mac-Test auf dem MacBook Air (12.11.2026, 15:04 bis 15:19 Uhr)
+
+Gerät: MacBook Air M1, macOS 26.6.2. Geprüft wurde der Debug-Build desselben Quellstands wie Build 5, bedient per Fernsteuerung (VNC) mit Bildschirmaufnahme nach jedem Schritt.
+
+| Schritt | Ergebnis |
+|---|---|
+| Start, Fenster, Menü „Light“ in der Menüleiste | in Ordnung |
+| Maus: Farbe wählen, Reiter Farbe/Modus/Timer | in Ordnung |
+| Maus: alle 6 Modi (Dauerlicht, SOS, Kerze, Disco, Regenbogen, Verlauf mit Von/Nach) | in Ordnung |
+| Timer 5 Minuten starten, Countdown läuft (auch im Reiter), Ausschalten beendet den Timer | in Ordnung |
+| Aus- und Einschalten per Knopf, Leertaste und ⌘L | in Ordnung |
+| Pfeiltasten links/rechts (Farbe), hoch/runter (Helligkeit 100 → 90 → 80 → 70 %) | in Ordnung |
+| Klick aufs Licht blendet die Bedienung aus, Escape holt sie zurück; Tasten wirken auch ohne Bedienung | in Ordnung |
+| „Nur Licht“: Vollbild über den ganzen Bildschirm, Escape zurück ins Fenster | in Ordnung |
+| Weißton-Regler mit der Maus ziehen | in Ordnung |
+| Favorit merken, Hinweis „right-click to remove“, Rechtsklick → „Remove favorite“, Rückgängig-Leiste erscheint | in Ordnung |
+
+Einschränkung: Über die Fernsteuerung gingen einzelne Klicks und Tastendrücke verloren (bei Wiederholung wirkten sie). Das trat bei Maus und Tastatur gleichermaßen und unabhängig vom Bedienelement auf; ich ordne es der Fernsteuerung zu, belegt ist das nicht. Nicht geprüft auf dem Mac: eigener Farbwähler, „Rückgängig“ anklicken, VoiceOver, Timer-Ablauf bis zum Ende.
+
+## Einreichung
+
+| Plattform | Version | Eingereicht | Status bei Abfrage |
+|---|---|---|---|
+| iOS (iPhone, iPad) | 1.1 (Build 5) | 12.11.2026, 14:52 Uhr | Warten auf Prüfung |
+| macOS | 1.1 (Build 5) | 12.11.2026, 15:20 Uhr | Warten auf Prüfung |
+
 ## Gegenprüfer
 
 - Code: 19 Funde, davon 1 kritisch. 17 übernommen und behoben, 2 bewusst so gelassen.
@@ -63,6 +89,6 @@ Stand: 12.11.2026. Geprüft wurde ausschließlich im Simulator (Vorgabe: kein ec
 
 - Kein Test auf echten Geräten: Haptik, tatsächliche Bildschirmhelligkeit, Akkuverbrauch und VoiceOver-Sprachausgabe sind nur am Code geprüft.
 - Übersetzungen: Deutsch und Englisch von Hand; 45 Sprachen maschinell übersetzt und in einem zweiten Durchgang gegengelesen, nicht von Muttersprachlern geprüft. Am unsichersten: Urdu, Odia, Slowenisch, Punjabi, Kannada, Malayalam.
-- Mac: Bedien-Tests mit Maus und Tastatur sind geschrieben, laufen aber erst, wenn niemand am Mac arbeitet (sie übernehmen den Mauszeiger). Bis dahin ist der Mac nur per Build und Fenster-Schnappschuss geprüft.
+- Mac: Die automatischen Bedien-Tests (XCUITest) sind geschrieben und bauen, wurden aber nicht ausgeführt: Auf dem Arbeits-Mac hätten sie Axels Arbeit unterbrochen, auf dem MacBook Air fehlt Xcode. Der Mac wurde stattdessen von Hand per Fernsteuerung geprüft (siehe unten).
 - Mac-Store-Bilder gibt es in Englisch und Deutsch; andere Sprachen zeigen im Mac App Store die englischen Bilder.
 - Die im Store verlinkte Datenschutzerklärung nennt bis zum Zusammenführen des Pull Requests noch den alten Namen „Screenlight Free“.
